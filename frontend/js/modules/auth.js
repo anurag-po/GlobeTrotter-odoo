@@ -133,4 +133,28 @@ export const AuthService = {
       window.location.href = 'index.html';
     }
   },
+
+  enforceAuth() {
+    const isPublicPage =
+      window.location.pathname.endsWith('index.html') ||
+      window.location.pathname.endsWith('login.html') ||
+      window.location.pathname.endsWith('register.html') ||
+      window.location.pathname.endsWith('/') ||
+      window.location.pathname === '';
+
+    const user = this.getCurrentUser();
+    if (!user) {
+      if (isPublicPage) {
+        setTimeout(() => {
+          if (window.UIService) {
+            window.UIService.openAuthModal('login');
+          }
+        }, 200);
+      } else {
+        alert('Please sign in or create an account to access GlobeTrotter travel features.');
+        window.location.href = 'index.html';
+      }
+    }
+  },
 };
+

@@ -47,6 +47,9 @@ export const AuthService = {
       return data.user;
     } catch (err) {
       if (identifier.toLowerCase() === ADMIN_EMAIL || identifier.toLowerCase() === 'admin1234') {
+        if (password !== 'AdminPassword123!') {
+          throw new Error('Invalid administrator password');
+        }
         const adminUser = {
           id: '00000000-0000-0000-0000-000000000001',
           username: 'admin1234',
@@ -132,6 +135,27 @@ export const AuthService = {
     if (!this.isAdmin()) {
       alert('Access Denied: The Admin Panel is restricted to system administrators (admin1234@temporaryaccount.none).');
       window.location.href = 'index.html';
+    }
+  },
+
+  enforceAuth() {
+    const isPublicPage =
+      window.location.pathname.endsWith('index.html') ||
+      window.location.pathname.endsWith('login.html') ||
+      window.location.pathname.endsWith('register.html') ||
+      window.location.pathname.endsWith('/') ||
+      window.location.pathname === '';
+
+    const user = this.getCurrentUser();
+    if (!user) {
+      if (isPublicPage) {
+        setTimeout(() => {
+          UIService.openAuthModal('login');
+        }, 200);
+      } else {
+        alert('Please sign in or create an account to access GlobeTrotter travel features.');
+        window.location.href = 'index.html';
+      }
     }
   },
 };
@@ -275,16 +299,13 @@ export const UIService = {
           <form id="gtLoginForm" onsubmit="window.handleModalLogin(event)">
             <div class="form-group">
               <label class="form-label" for="gtLoginEmail">Email or Username</label>
-              <input type="text" id="gtLoginEmail" class="form-control" placeholder="e.g. admin1234@temporaryaccount.none" required value="admin1234@temporaryaccount.none">
+              <input type="text" id="gtLoginEmail" class="form-control" placeholder="Enter your email or username" required>
             </div>
             <div class="form-group">
               <label class="form-label" for="gtLoginPassword">Password</label>
-              <input type="password" id="gtLoginPassword" class="form-control" placeholder="Enter your password" required value="AdminPassword123!">
+              <input type="password" id="gtLoginPassword" class="form-control" placeholder="Enter your password" required>
             </div>
-            <div style="font-size: 0.8rem; color: var(--clr-text-muted); margin-bottom: 16px;">
-              <i class="fas fa-shield-halved" style="color: var(--clr-primary);"></i> Admin: <strong>admin1234@temporaryaccount.none</strong>
-            </div>
-            <button type="submit" id="gtLoginSubmit" class="btn btn--primary btn--block" style="padding: 12px; font-weight: 700;">
+            <button type="submit" id="gtLoginSubmit" class="btn btn--primary btn--block" style="padding: 12px; font-weight: 700; margin-top: 10px;">
               <span>Sign In to GlobeTrotter</span>
               <i class="fas fa-arrow-right"></i>
             </button>
@@ -297,24 +318,24 @@ export const UIService = {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div class="form-group">
                 <label class="form-label" for="gtRegFirst">First Name *</label>
-                <input type="text" id="gtRegFirst" class="form-control" placeholder="Priya" required value="Priya">
+                <input type="text" id="gtRegFirst" class="form-control" placeholder="First Name" required>
               </div>
               <div class="form-group">
                 <label class="form-label" for="gtRegLast">Last Name *</label>
-                <input type="text" id="gtRegLast" class="form-control" placeholder="Sharma" required value="Sharma">
+                <input type="text" id="gtRegLast" class="form-control" placeholder="Last Name" required>
               </div>
             </div>
             <div class="form-group">
               <label class="form-label" for="gtRegEmail">Email Address *</label>
-              <input type="email" id="gtRegEmail" class="form-control" placeholder="priya@example.com" required value="priya.sharma@example.com">
+              <input type="email" id="gtRegEmail" class="form-control" placeholder="name@example.com" required>
             </div>
             <div class="form-group">
               <label class="form-label" for="gtRegPassword">Password (8+ chars, 1 letter & 1 digit) *</label>
-              <input type="password" id="gtRegPassword" class="form-control" placeholder="Create strong password" required value="TravelPass123!">
+              <input type="password" id="gtRegPassword" class="form-control" placeholder="Create strong password" required>
             </div>
             <div class="form-group">
               <label class="form-label" for="gtRegCity">City & Country</label>
-              <input type="text" id="gtRegCity" class="form-control" placeholder="Ahmedabad, India" value="Ahmedabad, India">
+              <input type="text" id="gtRegCity" class="form-control" placeholder="e.g. Mumbai, India">
             </div>
             <button type="submit" id="gtSignupSubmit" class="btn btn--primary btn--block" style="padding: 12px; font-weight: 700;">
               <span>Create Free Account</span>
@@ -520,7 +541,7 @@ export const AdminModule = {
   },
 };
 
-// Expose to window for global inline accessibility
+// Expose globally
 window.AuthService = AuthService;
 window.UIService = UIService;
 window.CalendarModule = CalendarModule;
@@ -580,7 +601,7 @@ window.handleModalSignup = async function (e) {
   }
 };
 
-// DOM Bootstrapper
+// DOM Bootstrapper & Auth Enforcement
 document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.querySelector('.header__hamburger');
   const nav = document.querySelector('.header__nav');
@@ -608,13 +629,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const isIndexPage =
-    window.location.pathname.endsWith('index.html') ||
-    window.location.pathname.endsWith('/') ||
-    window.location.pathname === '';
-  if (isIndexPage && !AuthService.getCurrentUser()) {
-    setTimeout(() => {
-      UIService.openAuthModal('login');
-    }, 300);
-  }
+  // Enforce Login / Sign up across application
+  AuthService.enforceAuth();
 });
