@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — GlobalTrotter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header Component -->
+  <header class="header">
+    <a href="index.html" class="header__logo">GlobalTrotter</a>
+    <button class="header__hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header__nav">
+      <a href="index.html">Home</a>
+      <a href="trips.html">My Trips</a>
+      <a href="search.html">Explore</a>
+      <a href="community.html">Community</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="profile.html">Profile</a>
+      <a href="admin.html" class="active">Admin</a>
+    </nav>
+    <div class="header__profile" title="Profile"><i class="fas fa-user"></i></div>
+  </header>
+
+  <!-- Toolbar / Search / Action Bar -->
+  <div class="toolbar">
+    <div class="toolbar__search">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" placeholder="Search users, destinations, activities, and logs..." aria-label="Search admin records">
+    </div>
+    <div class="toolbar__actions">
+      <button type="button" class="btn btn--outline" data-dropdown="groupby"><i class="fas fa-layer-group"></i> Group by ▾</button>
+      <button type="button" class="btn btn--outline" data-dropdown="filter"><i class="fas fa-filter"></i> Filter ▾</button>
+      <button type="button" class="btn btn--outline" data-dropdown="sortby"><i class="fas fa-sort"></i> Sort by ▾</button>
+    </div>
+  </div>
+
+  <!-- Page Content Container -->
+  <main class="page">
+
+    <!-- Admin Navigation Tabs -->
+    <div class="admin-tabs" role="tablist" aria-label="Admin Navigation Tabs">
+      <button type="button" class="admin-tabs__tab active" data-tab="tab-users" role="tab" aria-selected="true" aria-controls="tab-users">Manage Users</button>
+      <button type="button" class="admin-tabs__tab" data-tab="tab-cities" role="tab" aria-selected="false" aria-controls="tab-cities">Popular Cities</button>
+      <button type="button" class="admin-tabs__tab" data-tab="tab-activities" role="tab" aria-selected="false" aria-controls="tab-activities">Popular Activities</button>
+      <button type="button" class="admin-tabs__tab" data-tab="tab-trends" role="tab" aria-selected="false" aria-controls="tab-trends">User Trends and Analytics</button>
+    </div>
+
+    <!-- Tab 1: Manage Users (Active by default) -->
+    <section id="tab-users" class="admin-content active" role="tabpanel" aria-labelledby="tab-users">
+      <div class="admin-layout">
+        <div class="admin-chart" id="chart-users">
+          <!-- Pie chart injected by drawPieChart('chart-users') -->
+        </div>
+        <aside class="admin-sidebar">
+          <article class="admin-sidebar__card">
+            <h4>User Roles &amp; Permissions</h4>
+            <p>Manage system roles, administrative rights, community moderators, and travel guide credentials. Grant elevated trip curation permissions and audit user access logs.</p>
+          </article>
+          <article class="admin-sidebar__card">
+            <h4>Account Security &amp; Verification</h4>
+            <p>Review flagged traveler accounts, verify government IDs for local hosts, enforce multi-factor authentication, and monitor suspicious session activity.</p>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Tab 2: Popular Cities -->
+    <section id="tab-cities" class="admin-content" role="tabpanel" aria-labelledby="tab-cities">
+      <div class="admin-layout">
+        <div class="admin-chart" id="chart-cities" style="align-items: flex-start; justify-content: stretch;">
+          <div style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--clr-border);">
+              <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--clr-text);">Top 5 Visited Destinations</h3>
+              <span class="badge badge--completed">Global Data</span>
+            </div>
+            <ul style="display: flex; flex-direction: column; gap: 12px;">
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#1</span>
+                  <div>
+                    <div style="font-weight: 600;">Paris, France</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Europe &bull; 94.2% satisfaction rate</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">14,820 visits</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +12.4% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#2</span>
+                  <div>
+                    <div style="font-weight: 600;">Tokyo, Japan</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">East Asia &bull; 96.8% satisfaction rate</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">11,450 visits</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +18.6% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#3</span>
+                  <div>
+                    <div style="font-weight: 600;">New York City, USA</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">North America &bull; 91.5% satisfaction rate</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">9,380 visits</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +8.2% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#4</span>
+                  <div>
+                    <div style="font-weight: 600;">Rome, Italy</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Europe &bull; 93.4% satisfaction rate</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">8,720 visits</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +15.1% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#5</span>
+                  <div>
+                    <div style="font-weight: 600;">Bali, Indonesia</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Southeast Asia &bull; 95.1% satisfaction rate</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">7,960 visits</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +21.3% MoM</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <aside class="admin-sidebar">
+          <article class="admin-sidebar__card">
+            <h4>Destination Insights &amp; Growth</h4>
+            <p>Analyze top-trafficked tourist hubs, monitor regional growth vectors, and configure featured destination promotions across global travel corridors.</p>
+          </article>
+          <article class="admin-sidebar__card">
+            <h4>Tourism Board Collaborations</h4>
+            <p>Oversee regional partner sponsorships, maintain official tourism board campaigns, and verify verified local hospitality listings.</p>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Tab 3: Popular Activities -->
+    <section id="tab-activities" class="admin-content" role="tabpanel" aria-labelledby="tab-activities">
+      <div class="admin-layout">
+        <div class="admin-chart" id="chart-activities" style="align-items: flex-start; justify-content: stretch;">
+          <div style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--clr-border);">
+              <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--clr-text);">Top 5 Booked Travel Activities</h3>
+              <span class="badge badge--ongoing">Live Catalog</span>
+            </div>
+            <ul style="display: flex; flex-direction: column; gap: 12px;">
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#1</span>
+                  <div>
+                    <div style="font-weight: 600;">Historic Landmark &amp; Museum Guided Pass</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Cultural &bull; Avg. Duration: 3.5 hrs</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">18,240 bookings</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +14.2% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#2</span>
+                  <div>
+                    <div style="font-weight: 600;">Alpine Skiing &amp; Mountain Trekking</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Adventure &bull; Avg. Duration: Full Day</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">13,910 bookings</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +25.8% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#3</span>
+                  <div>
+                    <div style="font-weight: 600;">Coral Reef Scuba &amp; Snorkeling Excursion</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Water Sports &bull; Avg. Duration: 4.0 hrs</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">10,850 bookings</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +9.4% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#4</span>
+                  <div>
+                    <div style="font-weight: 600;">Local Vineyard Tasting &amp; Culinary Masterclass</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Gastronomy &bull; Avg. Duration: 3.0 hrs</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">9,420 bookings</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +11.7% MoM</div>
+                </div>
+              </li>
+              <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--clr-bg); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-weight: 700; color: var(--clr-primary); font-size: 1.1rem; width: 24px;">#5</span>
+                  <div>
+                    <div style="font-weight: 600;">Sunset Yacht Charter &amp; Coastal Cruise</div>
+                    <div style="font-size: 0.8rem; color: var(--clr-text-muted);">Sightseeing &bull; Avg. Duration: 2.5 hrs</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">8,190 bookings</span>
+                  <div style="font-size: 0.75rem; color: var(--clr-success); font-weight: 600;"><i class="fas fa-caret-up"></i> +16.0% MoM</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <aside class="admin-sidebar">
+          <article class="admin-sidebar__card">
+            <h4>Activity Moderation &amp; Safety</h4>
+            <p>Curate submitted itineraries and activities, monitor supplier safety certifications, review user feedback, and enforce verified booking guarantees.</p>
+          </article>
+          <article class="admin-sidebar__card">
+            <h4>Vendor Payouts &amp; Commission</h4>
+            <p>Track automated vendor escrow releases, calculate commission splits, and manage merchant disputes across multi-currency transactions.</p>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Tab 4: User Trends and Analytics -->
+    <section id="tab-trends" class="admin-content" role="tabpanel" aria-labelledby="tab-trends">
+      <div class="admin-layout">
+        <div class="admin-chart" id="chart-trends">
+          <!-- Bar chart injected by drawBarChart('chart-trends') -->
+        </div>
+        <aside class="admin-sidebar">
+          <article class="admin-sidebar__card">
+            <h4>User Engagement &amp; Booking Trends</h4>
+            <p>Track quarterly active travelers, itinerary creation rates, and seasonal travel surges across major holidays to forecast infrastructure scaling requirements.</p>
+          </article>
+          <article class="admin-sidebar__card">
+            <h4>Retention &amp; Conversion Telemetry</h4>
+            <p>Monitor cohort retention over 30-day and 90-day windows, evaluate checkout conversion funnels, and optimize platform engagement incentives.</p>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    drawPieChart('chart-users');
+    drawBarChart('chart-trends');
+  </script>
+</body>
+</html>
