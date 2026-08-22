@@ -164,13 +164,23 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
 
       try {
-        const user = await window.AuthService.login(identifier, password);
-        window.UIService.showToast(`Welcome back, ${user.firstName || user.username}!`, 'success');
+        const auth = window.AuthService || window.GlobeTrotterAuth;
+        if (!auth) {
+          throw new Error('Authentication service is initializing. Please try again.');
+        }
+        const user = await auth.login(identifier, password);
+        if (window.UIService) {
+          window.UIService.showToast(`Welcome back, ${user.firstName || user.username}!`, 'success');
+        }
         setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 350);
+          window.location.replace('index.html');
+        }, 300);
       } catch (err) {
-        window.UIService.showToast(err.message || 'Login failed', 'error');
+        if (window.UIService) {
+          window.UIService.showToast(err.message || 'Login failed', 'error');
+        } else {
+          alert(err.message || 'Login failed. Please check credentials.');
+        }
         btn.disabled = false;
         btn.innerHTML = '<span>Sign In to GlobeTrotter</span> <i class="fas fa-arrow-right"></i>';
       }
@@ -189,8 +199,12 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
 
       try {
+        const auth = window.AuthService || window.GlobeTrotterAuth;
+        if (!auth) {
+          throw new Error('Authentication service is initializing. Please try again.');
+        }
         const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
-        const user = await window.AuthService.register({
+        const user = await auth.register({
           username,
           email,
           password,
@@ -198,12 +212,18 @@
           lastName,
           city,
         });
-        window.UIService.showToast(`Account created! Welcome, ${user.firstName}!`, 'success');
+        if (window.UIService) {
+          window.UIService.showToast(`Account created! Welcome, ${user.firstName}!`, 'success');
+        }
         setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 350);
+          window.location.replace('index.html');
+        }, 300);
       } catch (err) {
-        window.UIService.showToast(err.message || 'Registration failed', 'error');
+        if (window.UIService) {
+          window.UIService.showToast(err.message || 'Registration failed', 'error');
+        } else {
+          alert(err.message || 'Registration failed. Please check details.');
+        }
         btn.disabled = false;
         btn.innerHTML = '<span>Create Free Explorer Account</span> <i class="fas fa-check"></i>';
       }

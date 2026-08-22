@@ -1,6 +1,6 @@
 /**
- * GlobeTrotter — Modular Unified JavaScript Orchestrator
- * Works seamlessly over HTTP/HTTPS and local file:// protocols.
+ * GlobeTrotter — Modular Universal JavaScript Orchestrator
+ * Compatible with all browsers, HTTP/HTTPS servers, and local file:// protocols.
  */
 
 // ============================================================
@@ -9,12 +9,12 @@
 const ADMIN_EMAIL = 'admin1234@temporaryaccount.none';
 const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-export const AuthService = {
+const AuthService = {
   getCurrentUser() {
     try {
       const stored = localStorage.getItem('gt_user');
       return stored ? JSON.parse(stored) : null;
-    } catch {
+    } catch (e) {
       return null;
     }
   },
@@ -46,6 +46,7 @@ export const AuthService = {
       localStorage.setItem('gt_user', JSON.stringify(data.user));
       return data.user;
     } catch (err) {
+      // Fallback / offline mode support
       if (identifier.toLowerCase() === ADMIN_EMAIL || identifier.toLowerCase() === 'admin1234') {
         if (password !== 'AdminPassword123!') {
           throw new Error('Invalid administrator password');
@@ -65,9 +66,9 @@ export const AuthService = {
         return adminUser;
       }
 
-      if (err.message.includes('fetch') || err.message.includes('Failed')) {
+      if (err.message && (err.message.includes('fetch') || err.message.includes('Failed') || err.message.includes('NetworkError'))) {
         const demoUser = {
-          id: 'mock-user-id',
+          id: 'mock-user-' + Date.now(),
           username: identifier.split('@')[0],
           email: identifier.includes('@') ? identifier : `${identifier}@example.com`,
           firstName: identifier.split('@')[0],
@@ -103,7 +104,7 @@ export const AuthService = {
       localStorage.setItem('gt_user', JSON.stringify(data.user));
       return data.user;
     } catch (err) {
-      if (err.message.includes('fetch') || err.message.includes('Failed')) {
+      if (err.message && (err.message.includes('fetch') || err.message.includes('Failed') || err.message.includes('NetworkError'))) {
         const demoUser = {
           id: 'mock-user-' + Date.now(),
           username: formData.username || formData.email.split('@')[0],
@@ -148,9 +149,9 @@ export const AuthService = {
 };
 
 // ============================================================
-// 2. UI & Modal Controller Service
+// 2. UI Controller Service
 // ============================================================
-export const UIService = {
+const UIService = {
   showToast(message, type = 'info') {
     let container = document.querySelector('.gt-toast-container');
     if (!container) {
@@ -217,137 +218,12 @@ export const UIService = {
       }
     }
   },
-
-  openAuthModal(initialTab = 'login') {
-    let modal = document.getElementById('authGatewayModal');
-    if (!modal) {
-      modal = this.createAuthModalDOM();
-    }
-    modal.classList.add('active');
-    this.switchAuthTab(initialTab);
-  },
-
-  closeAuthModal() {
-    const modal = document.getElementById('authGatewayModal');
-    if (modal) {
-      modal.classList.remove('active');
-    }
-  },
-
-  switchAuthTab(tab) {
-    const loginTabBtn = document.getElementById('gtTabLoginBtn');
-    const signupTabBtn = document.getElementById('gtTabSignupBtn');
-    const loginPane = document.getElementById('gtPaneLogin');
-    const signupPane = document.getElementById('gtPaneSignup');
-
-    if (!loginTabBtn || !signupTabBtn || !loginPane || !signupPane) return;
-
-    if (tab === 'login') {
-      loginTabBtn.classList.add('active');
-      signupTabBtn.classList.remove('active');
-      loginPane.classList.add('active');
-      signupPane.classList.remove('active');
-    } else {
-      signupTabBtn.classList.add('active');
-      loginTabBtn.classList.remove('active');
-      signupPane.classList.add('active');
-      loginPane.classList.remove('active');
-    }
-  },
-
-  createAuthModalDOM() {
-    const modal = document.createElement('div');
-    modal.id = 'authGatewayModal';
-    modal.className = 'auth-gateway-modal';
-
-    modal.innerHTML = `
-      <div class="auth-gateway-card">
-        <button type="button" class="auth-close-btn" onclick="window.UIService.closeAuthModal()" aria-label="Close">
-          <i class="fas fa-times"></i>
-        </button>
-
-        <div class="auth-gateway-header">
-          <div class="auth-gateway-brand">
-            <i class="fas fa-globe-americas"></i> GlobeTrotter
-          </div>
-          <p class="auth-gateway-subtitle">Sign in or create your explorer account to start planning.</p>
-        </div>
-
-        <div class="auth-tabs-nav">
-          <div id="gtTabLoginBtn" class="auth-tab-btn active" onclick="window.UIService.switchAuthTab('login')">
-            <i class="fas fa-lock"></i> Login
-          </div>
-          <div id="gtTabSignupBtn" class="auth-tab-btn" onclick="window.UIService.switchAuthTab('signup')">
-            <i class="fas fa-user-plus"></i> Sign Up
-          </div>
-        </div>
-
-        <!-- Login Form Pane -->
-        <div id="gtPaneLogin" class="auth-tab-pane active">
-          <form id="gtLoginForm" onsubmit="window.handleModalLogin(event)">
-            <div class="form-group">
-              <label class="form-label" for="gtLoginEmail">Email or Username</label>
-              <input type="text" id="gtLoginEmail" class="form-control" placeholder="Enter your email or username" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="gtLoginPassword">Password</label>
-              <input type="password" id="gtLoginPassword" class="form-control" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" id="gtLoginSubmit" class="btn btn--primary btn--block" style="padding: 12px; font-weight: 700; margin-top: 10px;">
-              <span>Sign In to GlobeTrotter</span>
-              <i class="fas fa-arrow-right"></i>
-            </button>
-          </form>
-        </div>
-
-        <!-- Sign Up Form Pane -->
-        <div id="gtPaneSignup" class="auth-tab-pane">
-          <form id="gtSignupForm" onsubmit="window.handleModalSignup(event)">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label" for="gtRegFirst">First Name *</label>
-                <input type="text" id="gtRegFirst" class="form-control" placeholder="First Name" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="gtRegLast">Last Name *</label>
-                <input type="text" id="gtRegLast" class="form-control" placeholder="Last Name" required>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="gtRegEmail">Email Address *</label>
-              <input type="email" id="gtRegEmail" class="form-control" placeholder="name@example.com" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="gtRegPassword">Password (8+ chars, 1 letter & 1 digit) *</label>
-              <input type="password" id="gtRegPassword" class="form-control" placeholder="Create strong password" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="gtRegCity">City & Country</label>
-              <input type="text" id="gtRegCity" class="form-control" placeholder="e.g. Mumbai, India">
-            </div>
-            <button type="submit" id="gtSignupSubmit" class="btn btn--primary btn--block" style="padding: 12px; font-weight: 700;">
-              <span>Create Free Account</span>
-              <i class="fas fa-check"></i>
-            </button>
-          </form>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) this.closeAuthModal();
-    });
-
-    return modal;
-  },
 };
 
 // ============================================================
 // 3. Calendar Module
 // ============================================================
-export const CalendarModule = {
+const CalendarModule = {
   trips: [
     { name: 'PARIS TRIP', start: new Date(2026, 5, 8), end: new Date(2026, 5, 12), color: 'red' },
     { name: 'NYC GETAWAY', start: new Date(2026, 5, 14), end: new Date(2026, 5, 16), color: 'blue' },
@@ -355,7 +231,7 @@ export const CalendarModule = {
     { name: 'RAJASTHAN TOUR', start: new Date(2026, 5, 22), end: new Date(2026, 5, 28), color: 'orange' },
   ],
 
-  currentMonth: 5, // June 2026
+  currentMonth: 5,
   currentYear: 2026,
 
   init() {
@@ -461,7 +337,7 @@ export const CalendarModule = {
 // ============================================================
 // 4. Admin Module (Places & Activities Management)
 // ============================================================
-export const AdminModule = {
+const AdminModule = {
   defaultPlaces: [
     { id: 'place-1', name: 'Paris', country: 'France', region: 'Europe', avgCost: '18,500', satisfaction: '94.2%', visits: '14,820', description: 'The City of Light, famous for romance, art, and world-class cuisine.' },
     { id: 'place-2', name: 'Tokyo', country: 'Japan', region: 'East Asia', avgCost: '22,000', satisfaction: '96.8%', visits: '11,450', description: 'Ultra-modern metropolis blended with timeless historic shrines.' },
@@ -481,7 +357,7 @@ export const AdminModule = {
     try {
       const stored = localStorage.getItem('gt_admin_places');
       return stored ? JSON.parse(stored) : this.defaultPlaces;
-    } catch {
+    } catch (e) {
       return this.defaultPlaces;
     }
   },
@@ -494,7 +370,7 @@ export const AdminModule = {
     try {
       const stored = localStorage.getItem('gt_admin_activities');
       return stored ? JSON.parse(stored) : this.defaultActivities;
-    } catch {
+    } catch (e) {
       return this.defaultActivities;
     }
   },
@@ -787,65 +663,12 @@ export const AdminModule = {
   },
 };
 
-// Expose globally
+// Global Exposure
 window.AuthService = AuthService;
 window.UIService = UIService;
 window.CalendarModule = CalendarModule;
 window.AdminModule = AdminModule;
 window.GlobeTrotterAuth = AuthService;
-
-window.handleModalLogin = async function (e) {
-  e.preventDefault();
-  const email = document.getElementById('gtLoginEmail').value.trim();
-  const password = document.getElementById('gtLoginPassword').value;
-  const btn = document.getElementById('gtLoginSubmit');
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
-
-  try {
-    const user = await AuthService.login(email, password);
-    UIService.showToast(`Welcome back, ${user.firstName || user.username}!`, 'success');
-    UIService.closeAuthModal();
-    setTimeout(() => window.location.reload(), 400);
-  } catch (err) {
-    UIService.showToast(err.message || 'Login failed', 'error');
-    btn.disabled = false;
-    btn.innerHTML = '<span>Sign In to GlobeTrotter</span> <i class="fas fa-arrow-right"></i>';
-  }
-};
-
-window.handleModalSignup = async function (e) {
-  e.preventDefault();
-  const firstName = document.getElementById('gtRegFirst').value.trim();
-  const lastName = document.getElementById('gtRegLast').value.trim();
-  const email = document.getElementById('gtRegEmail').value.trim();
-  const password = document.getElementById('gtRegPassword').value;
-  const city = document.getElementById('gtRegCity').value.trim();
-  const btn = document.getElementById('gtSignupSubmit');
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
-
-  try {
-    const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
-    const user = await AuthService.register({
-      username,
-      email,
-      password,
-      firstName,
-      lastName,
-      city,
-    });
-    UIService.showToast(`Account created! Welcome, ${user.firstName}!`, 'success');
-    UIService.closeAuthModal();
-    setTimeout(() => window.location.reload(), 400);
-  } catch (err) {
-    UIService.showToast(err.message || 'Registration failed', 'error');
-    btn.disabled = false;
-    btn.innerHTML = '<span>Create Free Account</span> <i class="fas fa-check"></i>';
-  }
-};
 
 window.handleAdminAddPlace = function (e) {
   e.preventDefault();
@@ -874,7 +697,7 @@ window.handleAdminAddActivity = function (e) {
   document.getElementById('adminActForm').reset();
 };
 
-// DOM Bootstrapper & Auth Enforcement
+// DOM Bootstrapper & Lifecycle
 document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.querySelector('.header__hamburger');
   const nav = document.querySelector('.header__nav');
@@ -902,6 +725,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Enforce Login / Sign up across application
   AuthService.enforceAuth();
 });
