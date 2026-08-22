@@ -44,6 +44,17 @@ const AuthService = {
       const data = await res.json();
       localStorage.setItem('gt_token', data.accessToken);
       localStorage.setItem('gt_user', JSON.stringify(data.user));
+
+      // Always sync to all users roster
+      try {
+        const stored = localStorage.getItem('gt_all_users');
+        const list = stored ? JSON.parse(stored) : [];
+        if (!list.some(u => u.email.toLowerCase() === data.user.email.toLowerCase())) {
+          list.push(data.user);
+          localStorage.setItem('gt_all_users', JSON.stringify(list));
+        }
+      } catch (e) {}
+
       return data.user;
     } catch (err) {
       // Fallback / offline mode support
@@ -67,7 +78,12 @@ const AuthService = {
       }
 
       // Check if user is in registered users store
-      const allUsers = AdminModule.getUsers();
+      let allUsers = [];
+      try {
+        const stored = localStorage.getItem('gt_all_users');
+        if (stored) allUsers = JSON.parse(stored);
+      } catch {}
+
       const matched = allUsers.find(u => u.email.toLowerCase() === identifier.toLowerCase() || u.username.toLowerCase() === identifier.toLowerCase());
       if (matched) {
         if (matched.status === 'suspended') {
@@ -89,6 +105,8 @@ const AuthService = {
           status: 'active',
           hasVerifiedEmail: true,
         };
+        allUsers.push(demoUser);
+        localStorage.setItem('gt_all_users', JSON.stringify(allUsers));
         localStorage.setItem('gt_token', 'mock-user-token');
         localStorage.setItem('gt_user', JSON.stringify(demoUser));
         return demoUser;
@@ -104,6 +122,8 @@ const AuthService = {
       throw new Error('Please enter a valid email address (e.g. traveler@example.com)');
     }
 
+    let registeredUser = null;
+
     try {
       const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -117,32 +137,41 @@ const AuthService = {
       }
 
       const data = await res.json();
+      registeredUser = data.user;
       localStorage.setItem('gt_token', data.accessToken);
       localStorage.setItem('gt_user', JSON.stringify(data.user));
-      return data.user;
     } catch (err) {
-      const demoUser = {
-        id: 'mock-user-' + Date.now(),
+      registeredUser = {
+        id: 'usr-' + Date.now(),
         username: formData.username || formData.email.split('@')[0],
         email: formData.email,
         firstName: formData.firstName || 'Traveler',
         lastName: formData.lastName || '',
-        role: formData.email === ADMIN_EMAIL ? 'admin' : 'user',
+        city: formData.city || 'Global',
+        role: formData.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user',
         status: 'active',
         hasVerifiedEmail: true,
+        createdAt: new Date().toISOString().split('T')[0]
       };
 
-      // Register into all users store
-      const users = AdminModule.getUsers();
-      if (!users.some(u => u.email === demoUser.email)) {
-        users.push(demoUser);
-        AdminModule.saveUsers(users);
-      }
-
       localStorage.setItem('gt_token', 'mock-user-token');
-      localStorage.setItem('gt_user', JSON.stringify(demoUser));
-      return demoUser;
+      localStorage.setItem('gt_user', JSON.stringify(registeredUser));
     }
+
+    // Persist registered user immediately into the global user directory
+    try {
+      const stored = localStorage.getItem('gt_all_users');
+      const allUsers = stored ? JSON.parse(stored) : [];
+      const idx = allUsers.findIndex(u => u.email.toLowerCase() === registeredUser.email.toLowerCase());
+      if (idx >= 0) {
+        allUsers[idx] = { ...allUsers[idx], ...registeredUser };
+      } else {
+        allUsers.push(registeredUser);
+      }
+      localStorage.setItem('gt_all_users', JSON.stringify(allUsers));
+    } catch (e) {}
+
+    return registeredUser;
   },
 
   logout() {
@@ -509,6 +538,7 @@ const AdminModule = {
 
   async getUsers() {
     const token = AuthService.getAccessToken();
+    let apiUsers = [];
     try {
       const res = await fetch(`${API_BASE_URL}/admin/users?pageSize=100`, {
         headers: {
@@ -517,27 +547,51 @@ const AdminModule = {
       });
       if (res.ok) {
         const data = await res.json();
-        const users = data.items || data.users || [];
-        if (Array.isArray(users) && users.length > 0) {
-          localStorage.setItem('gt_all_users', JSON.stringify(users));
-          return users;
-        }
+        apiUsers = data.items || data.users || [];
       }
     } catch (e) {
-      console.warn('Backend users fetch failed, reading local store:', e);
-    }
-    
-    // Fallback to current authenticated user only (NO dummy placeholders)
-    const stored = localStorage.getItem('gt_all_users');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
+      console.warn('Backend users fetch:', e);
     }
 
+    let localUsers = [];
+    try {
+      const stored = localStorage.getItem('gt_all_users');
+      if (stored) localUsers = JSON.parse(stored);
+    } catch {}
+
     const cur = AuthService.getCurrentUser();
-    return cur ? [cur] : [{ id: 'usr-admin', username: 'admin1234', email: ADMIN_EMAIL, firstName: 'GlobeTrotter', lastName: 'Admin', role: 'admin', status: 'active', createdAt: '2026-08-01' }];
+    if (cur) localUsers.push(cur);
+
+    // Merge uniquely by email address (case-insensitive)
+    const userMap = new Map();
+
+    // Default Super Admin always present
+    userMap.set(ADMIN_EMAIL.toLowerCase(), {
+      id: '00000000-0000-0000-0000-000000000001',
+      username: 'admin1234',
+      email: ADMIN_EMAIL,
+      firstName: 'GlobeTrotter',
+      lastName: 'Admin',
+      role: 'admin',
+      status: 'active',
+      createdAt: '2026-08-01'
+    });
+
+    apiUsers.forEach(u => {
+      if (u && u.email) userMap.set(u.email.toLowerCase(), u);
+    });
+
+    localUsers.forEach(u => {
+      if (u && u.email) {
+        const key = u.email.toLowerCase();
+        const existing = userMap.get(key);
+        userMap.set(key, { ...(existing || {}), ...u });
+      }
+    });
+
+    const finalUsers = Array.from(userMap.values());
+    localStorage.setItem('gt_all_users', JSON.stringify(finalUsers));
+    return finalUsers;
   },
 
   saveUsers(users) {
