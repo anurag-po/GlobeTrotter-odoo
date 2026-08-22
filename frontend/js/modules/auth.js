@@ -119,42 +119,24 @@ export const AuthService = {
   logout() {
     localStorage.removeItem('gt_token');
     localStorage.removeItem('gt_user');
-    if (window.UIService) {
-      window.UIService.showToast('Logged out successfully', 'info');
-    }
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 400);
+    window.location.replace('login.html');
   },
 
   checkAdminAccess() {
     if (!this.isAdmin()) {
       alert('Access Denied: The Admin Panel is restricted to system administrators (admin1234@temporaryaccount.none).');
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     }
   },
 
   enforceAuth() {
-    const isPublicPage =
-      window.location.pathname.endsWith('index.html') ||
+    const isAuthPage =
       window.location.pathname.endsWith('login.html') ||
-      window.location.pathname.endsWith('register.html') ||
-      window.location.pathname.endsWith('/') ||
-      window.location.pathname === '';
+      window.location.pathname.endsWith('register.html');
 
     const user = this.getCurrentUser();
-    if (!user) {
-      if (isPublicPage) {
-        setTimeout(() => {
-          if (window.UIService) {
-            window.UIService.openAuthModal('login');
-          }
-        }, 200);
-      } else {
-        alert('Please sign in or create an account to access GlobeTrotter travel features.');
-        window.location.href = 'index.html';
-      }
+    if (!user && !isAuthPage) {
+      window.location.replace('login.html');
     }
   },
 };
-

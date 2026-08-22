@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel — GlobalTrotter</title>
+  <title>Admin Panel — GlobeTrotter</title>
+  <script>
+    try {
+      const user = JSON.parse(localStorage.getItem('gt_user') || 'null');
+      if (!user || (user.email !== 'admin1234@temporaryaccount.none' && user.role !== 'admin')) {
+        alert('Access Denied: The Admin Panel is restricted to system administrators (admin1234@temporaryaccount.none).');
+        window.location.replace('login.html');
+      }
+    } catch (e) {
+      window.location.replace('login.html');
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,7 +22,7 @@
 
   <!-- Header Component -->
   <header class="header">
-    <a href="index.html" class="header__logo">GlobalTrotter</a>
+    <a href="index.html" class="header__logo">GlobeTrotter</a>
     <button class="header__hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>

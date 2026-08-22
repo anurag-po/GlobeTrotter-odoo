@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Explore Activities &amp; Destinations — GlobalTrotter</title>
+  <title>Explore Activities &amp; Destinations — GlobeTrotter</title>
+  <script>
+    if (!localStorage.getItem('gt_user')) {
+      window.location.replace('login.html');
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/main.js" defer></script>
@@ -12,7 +17,7 @@
 
   <!-- Navigation Header -->
   <header class="header">
-    <a href="index.html" class="header__logo">GlobalTrotter</a>
+    <a href="index.html" class="header__logo">GlobeTrotter</a>
     <button class="header__hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -23,7 +28,7 @@
       <a href="community.html">Community</a>
       <a href="calendar.html">Calendar</a>
       <a href="profile.html">Profile</a>
-      <a href="admin.html">Admin</a>
+      <a href="admin.html" style="display: none;">Admin</a>
     </nav>
     <div class="header__profile" title="Profile"><i class="fas fa-user"></i></div>
   </header>

@@ -3,79 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — GlobalTrotter</title>
+  <title>Sign In &amp; Register — GlobeTrotter</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-tab-nav {
+      display: flex;
+      background: var(--clr-bg);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 24px;
+      border: 1px solid var(--clr-border);
+    }
+    .auth-tab-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--clr-text-muted);
+      transition: all 0.2s ease;
+    }
+    .auth-tab-btn.active {
+      background: var(--clr-white);
+      color: var(--clr-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .auth-panel {
+      display: none;
+    }
+    .auth-panel.active {
+      display: block;
+    }
+  </style>
 </head>
 <body class="auth-layout">
 
-  <div class="auth-card">
+  <div class="auth-card" style="max-width: 480px;">
     <div class="auth-header">
-      <div style="font-size: 2.2rem; color: var(--clr-primary); margin-bottom: 12px;">
+      <div style="font-size: 2.5rem; color: var(--clr-primary); margin-bottom: 10px;">
         <i class="fas fa-globe-americas"></i>
       </div>
-      <h1>Welcome Back!</h1>
-      <p>Sign in to manage and plan your personalized travel itineraries.</p>
+      <h1 id="authTitle" style="font-size: 1.8rem; margin-bottom: 6px;">GlobeTrotter</h1>
+      <p id="authSubtitle" style="color: var(--clr-text-muted); font-size: 0.9rem;">
+        Sign in or register your explorer account to start planning.
+      </p>
     </div>
 
-    <form id="standaloneLoginForm" onsubmit="handleStandaloneLogin(event)">
-      <div class="form-group">
-        <label for="email" class="form-label">Email Address or Username</label>
-        <input type="text" id="email" name="email" class="form-control" placeholder="Enter your email or username" required>
+    <!-- Switchable Tabs -->
+    <div class="auth-tab-nav">
+      <div id="tabBtnLogin" class="auth-tab-btn active" onclick="switchAuthTab('login')">
+        <i class="fas fa-lock"></i> Sign In
       </div>
+      <div id="tabBtnSignup" class="auth-tab-btn" onclick="switchAuthTab('signup')">
+        <i class="fas fa-user-plus"></i> Register
+      </div>
+    </div>
 
-      <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <label for="password" class="form-label" style="margin-bottom: 0;">Password</label>
-          <a href="#" style="font-size: 0.8rem; font-weight: 600;">Forgot Password?</a>
+    <!-- Login Form Panel -->
+    <div id="panelLogin" class="auth-panel active">
+      <form id="standaloneLoginForm" onsubmit="handleStandaloneLogin(event)">
+        <div class="form-group">
+          <label for="loginIdentifier" class="form-label">Email Address or Username</label>
+          <input type="text" id="loginIdentifier" class="form-control" placeholder="Enter your email or username" required>
         </div>
-        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
-      </div>
 
-      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="remember" name="remember" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--clr-primary);">
-        <label for="remember" style="font-size: 0.85rem; color: var(--clr-text-muted); cursor: pointer; margin-bottom: 0;">Keep me logged in on this PC</label>
-      </div>
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label for="loginPassword" class="form-label" style="margin-bottom: 0;">Password</label>
+          </div>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+        </div>
 
-      <button type="submit" id="loginBtn" class="btn btn--primary btn--block" style="padding: 12px; font-size: 1rem; margin-top: 10px;">
-        <span>Login to GlobeTrotter</span>
-        <i class="fas fa-arrow-right"></i>
-      </button>
-    </form>
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="remember" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--clr-primary);">
+          <label for="remember" style="font-size: 0.85rem; color: var(--clr-text-muted); cursor: pointer; margin-bottom: 0;">Keep me signed in</label>
+        </div>
 
-    <p style="text-align: center; margin-top: 24px; font-size: 0.85rem; color: var(--clr-text-muted);">
-      Don't have an account yet?
-      <a href="register.html" style="font-weight: 700;">Create your account here</a>
-    </p>
-
-    <div style="text-align: center; margin-top: 16px;">
-      <a href="index.html" style="font-size: 0.85rem; color: var(--clr-text-muted);">
-        <i class="fas fa-chevron-left"></i> Back to Home
-      </a>
+        <button type="submit" id="loginBtn" class="btn btn--primary btn--block" style="padding: 12px; font-size: 1rem; font-weight: 700; margin-top: 10px;">
+          <span>Sign In to GlobeTrotter</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
     </div>
+
+    <!-- Sign Up Form Panel -->
+    <div id="panelSignup" class="auth-panel">
+      <form id="standaloneSignupForm" onsubmit="handleStandaloneSignup(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="regFirst" class="form-label">First Name *</label>
+            <input type="text" id="regFirst" class="form-control" placeholder="First Name" required>
+          </div>
+          <div class="form-group">
+            <label for="regLast" class="form-label">Last Name *</label>
+            <input type="text" id="regLast" class="form-control" placeholder="Last Name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="regEmail" class="form-label">Email Address *</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regPassword" class="form-label">Password (8+ chars, 1 letter &amp; 1 digit) *</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Create a strong password" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regCity" class="form-label">City &amp; Country</label>
+          <input type="text" id="regCity" class="form-control" placeholder="e.g. Mumbai, India">
+        </div>
+
+        <button type="submit" id="signupBtn" class="btn btn--primary btn--block" style="padding: 12px; font-size: 1rem; font-weight: 700; margin-top: 10px;">
+          <span>Create Free Explorer Account</span>
+          <i class="fas fa-check"></i>
+        </button>
+      </form>
+    </div>
+
   </div>
 
   <script src="js/main.js"></script>
   <script>
+    function switchAuthTab(tab) {
+      const tabLogin = document.getElementById('tabBtnLogin');
+      const tabSignup = document.getElementById('tabBtnSignup');
+      const panelLogin = document.getElementById('panelLogin');
+      const panelSignup = document.getElementById('panelSignup');
+      const title = document.getElementById('authTitle');
+      const subtitle = document.getElementById('authSubtitle');
+
+      if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        panelLogin.classList.add('active');
+        panelSignup.classList.remove('active');
+        title.textContent = 'Welcome Back!';
+        subtitle.textContent = 'Sign in to manage and plan your personalized travel itineraries.';
+      } else {
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        panelSignup.classList.add('active');
+        panelLogin.classList.remove('active');
+        title.textContent = 'Create Account';
+        subtitle.textContent = 'Join GlobeTrotter to build multi-city journeys and track budgets.';
+      }
+    }
+
     async function handleStandaloneLogin(e) {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+      const identifier = document.getElementById('loginIdentifier').value.trim();
+      const password = document.getElementById('loginPassword').value;
       const btn = document.getElementById('loginBtn');
+
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
 
       try {
-        const user = await GlobeTrotterAuth.login(email, password);
-        showToast(`Welcome back, ${user.firstName || user.username}!`, 'success');
+        const user = await window.AuthService.login(identifier, password);
+        window.UIService.showToast(`Welcome back, ${user.firstName || user.username}!`, 'success');
         setTimeout(() => {
           window.location.href = 'index.html';
-        }, 500);
+        }, 350);
       } catch (err) {
-        showToast(err.message || 'Login failed', 'error');
+        window.UIService.showToast(err.message || 'Login failed', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<span>Login to GlobeTrotter</span> <i class="fas fa-arrow-right"></i>';
+        btn.innerHTML = '<span>Sign In to GlobeTrotter</span> <i class="fas fa-arrow-right"></i>';
       }
+    }
+
+    async function handleStandaloneSignup(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('regFirst').value.trim();
+      const lastName = document.getElementById('regLast').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const city = document.getElementById('regCity').value.trim();
+      const btn = document.getElementById('signupBtn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+
+      try {
+        const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+        const user = await window.AuthService.register({
+          username,
+          email,
+          password,
+          firstName,
+          lastName,
+          city,
+        });
+        window.UIService.showToast(`Account created! Welcome, ${user.firstName}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 350);
+      } catch (err) {
+        window.UIService.showToast(err.message || 'Registration failed', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Create Free Explorer Account</span> <i class="fas fa-check"></i>';
+      }
+    }
+
+    // Check if URL specifies register tab (e.g. login.html?tab=signup)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'signup') {
+      switchAuthTab('signup');
     }
   </script>
 </body>

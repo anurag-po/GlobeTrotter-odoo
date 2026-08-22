@@ -125,37 +125,24 @@ export const AuthService = {
   logout() {
     localStorage.removeItem('gt_token');
     localStorage.removeItem('gt_user');
-    UIService.showToast('Logged out successfully', 'info');
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 400);
+    window.location.replace('login.html');
   },
 
   checkAdminAccess() {
     if (!this.isAdmin()) {
       alert('Access Denied: The Admin Panel is restricted to system administrators (admin1234@temporaryaccount.none).');
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     }
   },
 
   enforceAuth() {
-    const isPublicPage =
-      window.location.pathname.endsWith('index.html') ||
+    const isAuthPage =
       window.location.pathname.endsWith('login.html') ||
-      window.location.pathname.endsWith('register.html') ||
-      window.location.pathname.endsWith('/') ||
-      window.location.pathname === '';
+      window.location.pathname.endsWith('register.html');
 
     const user = this.getCurrentUser();
-    if (!user) {
-      if (isPublicPage) {
-        setTimeout(() => {
-          UIService.openAuthModal('login');
-        }, 150);
-      } else {
-        alert('Please sign in or create an account to access GlobeTrotter travel features.');
-        window.location.href = 'index.html';
-      }
+    if (!user && !isAuthPage) {
+      window.location.replace('login.html');
     }
   },
 };
@@ -213,16 +200,17 @@ export const UIService = {
         const displayName = user.firstName || user.username || 'Traveler';
         const roleBadge = isAdmin ? '<span class="header__role-badge">Admin</span>' : '';
         profileSlot.outerHTML = `
-          <div class="header__user-pill" title="Click to view profile" onclick="window.location.href='profile.html'">
-            <img src="${user.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" alt="${displayName}" class="header__user-avatar">
-            <span>${displayName}</span>
+          <div class="header__user-pill" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 12px; background: rgba(255,255,255,0.18); border-radius: 20px;" onclick="window.location.href='profile.html'">
+            <span style="font-weight: 700; color: #fff;">${displayName}</span>
             ${roleBadge}
-            <i class="fas fa-right-from-bracket" title="Log Out" style="margin-left: 6px; font-size: 0.8rem; opacity: 0.8;" onclick="event.stopPropagation(); window.AuthService.logout();"></i>
+            <button type="button" title="Log Out" style="background: rgba(0,0,0,0.25); border: none; color: #fff; cursor: pointer; padding: 4px 8px; border-radius: 12px; margin-left: 6px; font-size: 0.75rem; font-weight: 700;" onclick="event.stopPropagation(); window.AuthService.logout();">
+              <i class="fas fa-right-from-bracket"></i> Log Out
+            </button>
           </div>
         `;
       } else {
         profileSlot.outerHTML = `
-          <button type="button" class="btn btn--sm" style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 700; border-radius: 20px; padding: 6px 16px;" onclick="window.UIService.openAuthModal('login')">
+          <button type="button" class="btn btn--sm" style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 700; border-radius: 20px; padding: 6px 16px;" onclick="window.location.href='login.html'">
             <i class="fas fa-user-circle"></i> Sign In / Register
           </button>
         `;
