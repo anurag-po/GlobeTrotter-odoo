@@ -76,5 +76,6 @@ VALUES (
     true,
     '{"email": true, "push": true, "inApp": true}'::jsonb
 )
-ON CONFLICT (email) DO UPDATE SET role = 'admin', status = 'active';
+ON CONFLICT (id) DO UPDATE SET role = 'admin', status = 'active';
+
 
