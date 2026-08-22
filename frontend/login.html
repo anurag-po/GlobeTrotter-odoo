@@ -154,11 +154,27 @@
       }
     }
 
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    function isValidEmail(email) {
+      return EMAIL_REGEX.test(String(email).toLowerCase().trim());
+    }
+
     async function handleStandaloneLogin(e) {
       e.preventDefault();
       const identifier = document.getElementById('loginIdentifier').value.trim();
       const password = document.getElementById('loginPassword').value;
       const btn = document.getElementById('loginBtn');
+
+      if (identifier.includes('@') && !isValidEmail(identifier)) {
+        if (window.UIService) {
+          window.UIService.showToast('Please enter a valid email address format (e.g. traveler@example.com)', 'error');
+        } else {
+          alert('Please enter a valid email address format.');
+        }
+        document.getElementById('loginIdentifier').focus();
+        return;
+      }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
@@ -194,6 +210,16 @@
       const password = document.getElementById('regPassword').value;
       const city = document.getElementById('regCity').value.trim();
       const btn = document.getElementById('signupBtn');
+
+      if (!isValidEmail(email)) {
+        if (window.UIService) {
+          window.UIService.showToast('Please provide a valid email address (e.g. explorer@example.com)', 'error');
+        } else {
+          alert('Please provide a valid email address.');
+        }
+        document.getElementById('regEmail').focus();
+        return;
+      }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';

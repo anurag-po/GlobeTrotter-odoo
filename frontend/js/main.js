@@ -99,6 +99,11 @@ const AuthService = {
   },
 
   async register(formData) {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (formData.email && !emailPattern.test(formData.email.trim())) {
+      throw new Error('Please enter a valid email address (e.g. traveler@example.com)');
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
