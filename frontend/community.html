@@ -155,8 +155,18 @@
             <textarea id="postContent" class="form-control" rows="4" placeholder="Share your experience, recommendations, budget tips, and favorite spots..." required></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label">Attach Image URL (Optional)</label>
-            <input type="url" id="postImageUrl" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+            <label class="form-label">Upload Photo or Enter Image URL (Optional)</label>
+            <input type="file" id="postPhotoFile" accept="image/*" class="form-control" onchange="previewPostUploadPhoto(this)">
+            <input type="hidden" id="postPhotoBase64">
+            <div style="margin-top: 8px;">
+              <input type="url" id="postImageUrl" class="form-control" placeholder="Or paste image URL: https://images.unsplash.com/...">
+            </div>
+            <div id="postPhotoPreviewContainer" style="display: none; align-items: center; gap: 10px; margin-top: 8px;">
+              <img id="postPhotoPreviewImg" src="" style="width: 70px; height: 50px; border-radius: 4px; object-fit: cover; border: 1px solid var(--clr-border);">
+              <button type="button" class="btn btn--sm" style="background: #FEE2E2; color: #DC2626;" onclick="clearPostPhotoUpload()">
+                <i class="fas fa-trash-alt"></i> Remove
+              </button>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -328,7 +338,34 @@
       renderFeed();
     }
 
+    function previewPostUploadPhoto(input) {
+      const file = input.files[0];
+      if (file) {
+        if (file.size > 4 * 1024 * 1024) {
+          alert('Photo is too large. Please choose an image under 4MB.');
+          input.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('postPhotoBase64').value = e.target.result;
+          document.getElementById('postPhotoPreviewImg').src = e.target.result;
+          document.getElementById('postPhotoPreviewContainer').style.display = 'flex';
+          document.getElementById('postImageUrl').value = '';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function clearPostPhotoUpload() {
+      document.getElementById('postPhotoFile').value = '';
+      document.getElementById('postPhotoBase64').value = '';
+      document.getElementById('postPhotoPreviewContainer').style.display = 'none';
+    }
+
     function openCreatePostModal() {
+      clearPostPhotoUpload();
+      document.getElementById('createPostForm').reset();
       document.getElementById('createPostModal').classList.add('active');
     }
 
@@ -343,7 +380,10 @@
       const title = document.getElementById('postTitle').value.trim();
       const location = document.getElementById('postLocation').value.trim();
       const content = document.getElementById('postContent').value.trim();
+      const photoBase64 = document.getElementById('postPhotoBase64').value;
       const imageUrl = document.getElementById('postImageUrl').value.trim();
+
+      const finalImage = photoBase64 || imageUrl || null;
 
       const posts = getCommunityPosts();
       const newPost = {
@@ -353,9 +393,9 @@
         location,
         date: 'Just now',
         content,
-        imageUrl: imageUrl || null,
-        likes: 1,
-        liked: true,
+        imageUrl: finalImage,
+        likes: 0,
+        liked: false,
         comments: []
       };
 
@@ -363,6 +403,7 @@
       saveCommunityPosts(posts);
       closeCreatePostModal();
       document.getElementById('createPostForm').reset();
+      clearPostPhotoUpload();
       renderFeed();
       window.UIService.showToast('Your travel story has been published!', 'success');
     }

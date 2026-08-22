@@ -238,18 +238,31 @@ const UIService = {
 };
 
 // ============================================================
-// 3. Calendar Module
+// 3. Calendar Module (Interactive Occupancy Management)
 // ============================================================
 const CalendarModule = {
-  trips: [
-    { name: 'PARIS TRIP', start: new Date(2026, 5, 8), end: new Date(2026, 5, 12), color: 'red' },
-    { name: 'NYC GETAWAY', start: new Date(2026, 5, 14), end: new Date(2026, 5, 16), color: 'blue' },
-    { name: 'JAPAN ADVENTURE', start: new Date(2026, 5, 16), end: new Date(2026, 5, 20), color: 'green' },
-    { name: 'RAJASTHAN TOUR', start: new Date(2026, 5, 22), end: new Date(2026, 5, 28), color: 'orange' },
+  defaultTrips: [
+    { id: 'cal-1', name: 'PARIS TRIP', start: '2026-06-08', end: '2026-06-12', color: 'red' },
+    { id: 'cal-2', name: 'NYC GETAWAY', start: '2026-06-14', end: '2026-06-16', color: 'blue' },
+    { id: 'cal-3', name: 'JAPAN ADVENTURE', start: '2026-06-16', end: '2026-06-20', color: 'green' },
+    { id: 'cal-4', name: 'RAJASTHAN TOUR', start: '2026-06-22', end: '2026-06-28', color: 'orange' },
   ],
 
   currentMonth: 5,
   currentYear: 2026,
+
+  getTrips() {
+    try {
+      const stored = localStorage.getItem('gt_calendar_trips');
+      return stored ? JSON.parse(stored) : this.defaultTrips;
+    } catch {
+      return this.defaultTrips;
+    }
+  },
+
+  saveTrips(trips) {
+    localStorage.setItem('gt_calendar_trips', JSON.stringify(trips));
+  },
 
   init() {
     const calendarContainer = document.getElementById('calendar');
@@ -306,6 +319,7 @@ const CalendarModule = {
     const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
     const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
     const today = new Date();
+    const trips = this.getTrips();
 
     for (let i = 0; i < firstDay; i++) {
       const cell = document.createElement('div');
@@ -316,6 +330,15 @@ const CalendarModule = {
     for (let day = 1; day <= daysInMonth; day++) {
       const cell = document.createElement('div');
       cell.className = 'calendar-grid__cell';
+      cell.style.cursor = 'pointer';
+      cell.title = `Click to schedule or edit occupancy for ${monthNames[this.currentMonth]} ${day}, ${this.currentYear}`;
+
+      const yr = this.currentYear;
+      const mo = this.currentMonth;
+      const d = day;
+      cell.addEventListener('click', () => {
+        this.openEditDateModal(yr, mo, d);
+      });
 
       if (
         day === today.getDate() &&
@@ -331,16 +354,17 @@ const CalendarModule = {
       cell.appendChild(dayNum);
 
       const cellDate = new Date(this.currentYear, this.currentMonth, day);
-      this.trips.forEach((trip) => {
+      cellDate.setHours(0, 0, 0, 0);
+
+      trips.forEach((trip) => {
         const tripStart = new Date(trip.start);
         const tripEnd = new Date(trip.end);
         tripStart.setHours(0, 0, 0, 0);
         tripEnd.setHours(0, 0, 0, 0);
-        cellDate.setHours(0, 0, 0, 0);
 
         if (cellDate >= tripStart && cellDate <= tripEnd) {
           const evt = document.createElement('span');
-          evt.className = `calendar-event calendar-event--${trip.color}`;
+          evt.className = `calendar-event calendar-event--${trip.color || 'blue'}`;
           evt.textContent = trip.name;
           cell.appendChild(evt);
         }
@@ -348,6 +372,113 @@ const CalendarModule = {
 
       gridEl.appendChild(cell);
     }
+  },
+
+  openEditDateModal(year, month, day) {
+    const modal = document.getElementById('editDateModal');
+    if (!modal) return;
+
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+
+    document.getElementById('calEditYear').value = year;
+    document.getElementById('calEditMonth').value = month;
+    document.getElementById('calEditDay').value = day;
+    document.getElementById('calSelectedDateBanner').textContent = `Selected Date: ${monthNames[month]} ${day}, ${year}`;
+
+    // Find if there is an existing event on this day
+    const checkDate = new Date(year, month, day);
+    checkDate.setHours(0, 0, 0, 0);
+
+    const trips = this.getTrips();
+    const existing = trips.find(t => {
+      const s = new Date(t.start); s.setHours(0, 0, 0, 0);
+      const e = new Date(t.end); e.setHours(0, 0, 0, 0);
+      return checkDate >= s && checkDate <= e;
+    });
+
+    if (existing) {
+      document.getElementById('calEventName').value = existing.name;
+      document.getElementById('calEventColor').value = existing.color || 'blue';
+      const s = new Date(existing.start);
+      const e = new Date(existing.end);
+      const diffDays = Math.max(1, Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1);
+      document.getElementById('calEventDuration').value = diffDays;
+    } else {
+      document.getElementById('calEventName').value = '';
+      document.getElementById('calEventColor').value = 'blue';
+      document.getElementById('calEventDuration').value = 1;
+    }
+
+    modal.classList.add('active');
+  },
+
+  closeEditDateModal() {
+    const modal = document.getElementById('editDateModal');
+    if (modal) modal.classList.remove('active');
+  },
+
+  handleSaveDateOccupancy(e) {
+    e.preventDefault();
+    const year = Number(document.getElementById('calEditYear').value);
+    const month = Number(document.getElementById('calEditMonth').value);
+    const day = Number(document.getElementById('calEditDay').value);
+    const name = document.getElementById('calEventName').value.trim();
+    const color = document.getElementById('calEventColor').value;
+    const duration = Math.max(1, Number(document.getElementById('calEventDuration').value) || 1);
+
+    const startDate = new Date(year, month, day);
+    const endDate = new Date(year, month, day + duration - 1);
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const startStr = `${startDate.getFullYear()}-${pad(startDate.getMonth() + 1)}-${pad(startDate.getDate())}`;
+    const endStr = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}`;
+
+    let trips = this.getTrips();
+    // Remove conflicting event on this start date
+    const checkDate = new Date(year, month, day);
+    checkDate.setHours(0, 0, 0, 0);
+    trips = trips.filter(t => {
+      const s = new Date(t.start); s.setHours(0, 0, 0, 0);
+      const e = new Date(t.end); e.setHours(0, 0, 0, 0);
+      return !(checkDate >= s && checkDate <= e);
+    });
+
+    trips.push({
+      id: 'cal-' + Date.now(),
+      name,
+      start: startStr,
+      end: endStr,
+      color,
+    });
+
+    this.saveTrips(trips);
+    this.closeEditDateModal();
+    this.render();
+    UIService.showToast(`Occupancy updated: "${name}" scheduled!`, 'success');
+  },
+
+  handleClearDateOccupancy() {
+    const year = Number(document.getElementById('calEditYear').value);
+    const month = Number(document.getElementById('calEditMonth').value);
+    const day = Number(document.getElementById('calEditDay').value);
+
+    const checkDate = new Date(year, month, day);
+    checkDate.setHours(0, 0, 0, 0);
+
+    let trips = this.getTrips();
+    trips = trips.filter(t => {
+      const s = new Date(t.start); s.setHours(0, 0, 0, 0);
+      const e = new Date(t.end); e.setHours(0, 0, 0, 0);
+      return !(checkDate >= s && checkDate <= e);
+    });
+
+    this.saveTrips(trips);
+    this.closeEditDateModal();
+    this.render();
+    UIService.showToast('Date cleared and marked available.', 'info');
   },
 };
 

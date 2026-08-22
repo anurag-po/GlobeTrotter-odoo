@@ -175,8 +175,16 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Profile Image URL (Leave blank to use Initial)</label>
-            <input type="url" id="editPhotoUrl" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+            <label class="form-label">Upload Profile Photo</label>
+            <input type="file" id="editPhotoFile" accept="image/*" class="form-control" onchange="previewUploadedProfilePhoto(this)">
+            <input type="hidden" id="editPhotoBase64">
+            <div id="photoPreviewContainer" style="display: none; align-items: center; gap: 12px; margin-top: 10px;">
+              <img id="editPhotoPreviewImg" src="" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--clr-primary);">
+              <button type="button" class="btn btn--sm" style="background: #FEE2E2; color: #DC2626; border-radius: 6px; font-weight: 700;" onclick="removeProfilePhoto()">
+                <i class="fas fa-trash-alt"></i> Remove Photo (Use Initial)
+              </button>
+            </div>
+            <small style="color: var(--clr-text-muted); font-size: 0.78rem; display: block; margin-top: 4px;">Choose an image file from your device (JPG, PNG). Leave empty to use your name initial.</small>
           </div>
         </div>
         <div class="modal-footer">
@@ -189,6 +197,31 @@
 
   <script src="js/main.js"></script>
   <script>
+    function previewUploadedProfilePhoto(input) {
+      const file = input.files[0];
+      if (file) {
+        if (file.size > 4 * 1024 * 1024) {
+          alert('Photo is too large. Please select an image under 4MB.');
+          input.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const dataUrl = e.target.result;
+          document.getElementById('editPhotoBase64').value = dataUrl;
+          document.getElementById('editPhotoPreviewImg').src = dataUrl;
+          document.getElementById('photoPreviewContainer').style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeProfilePhoto() {
+      document.getElementById('editPhotoFile').value = '';
+      document.getElementById('editPhotoBase64').value = 'REMOVE';
+      document.getElementById('photoPreviewContainer').style.display = 'none';
+    }
+
     function renderProfile() {
       const user = window.AuthService.getCurrentUser();
       if (!user) {
@@ -210,7 +243,7 @@
       const initialEl = document.getElementById('profInitialAvatar');
       const imgEl = document.getElementById('profImgAvatar');
 
-      if (user.photoUrl && user.photoUrl.trim() !== '') {
+      if (user.photoUrl && user.photoUrl.trim() !== '' && user.photoUrl !== 'REMOVE') {
         imgEl.src = user.photoUrl;
         imgEl.style.display = 'block';
         initialEl.style.display = 'none';
@@ -257,7 +290,18 @@
       document.getElementById('editPhone').value = user.phoneNumber || user.phone || '';
       document.getElementById('editCity').value = user.city || '';
       document.getElementById('editCountry').value = user.country || '';
-      document.getElementById('editPhotoUrl').value = user.photoUrl || '';
+      document.getElementById('editPhotoFile').value = '';
+      document.getElementById('editPhotoBase64').value = '';
+      
+      const previewCont = document.getElementById('photoPreviewContainer');
+      const previewImg = document.getElementById('editPhotoPreviewImg');
+      if (user.photoUrl && user.photoUrl.trim() !== '' && user.photoUrl !== 'REMOVE') {
+        previewImg.src = user.photoUrl;
+        previewCont.style.display = 'flex';
+      } else {
+        previewCont.style.display = 'none';
+      }
+
       document.getElementById('editProfileModal').classList.add('active');
     }
 
@@ -273,9 +317,26 @@
       user.phoneNumber = document.getElementById('editPhone').value.trim();
       user.city = document.getElementById('editCity').value.trim();
       user.country = document.getElementById('editCountry').value.trim();
-      user.photoUrl = document.getElementById('editPhotoUrl').value.trim();
+      
+      const newPhotoBase64 = document.getElementById('editPhotoBase64').value;
+      if (newPhotoBase64 === 'REMOVE') {
+        user.photoUrl = '';
+      } else if (newPhotoBase64 && newPhotoBase64.trim() !== '') {
+        user.photoUrl = newPhotoBase64;
+      }
 
       localStorage.setItem('gt_user', JSON.stringify(user));
+
+      // Sync with admin store
+      let allUsers = JSON.parse(localStorage.getItem('gt_all_users') || '[]');
+      const matchIndex = allUsers.findIndex(u => u.email === user.email);
+      if (matchIndex >= 0) {
+        allUsers[matchIndex].firstName = user.firstName;
+        allUsers[matchIndex].lastName = user.lastName;
+        allUsers[matchIndex].photoUrl = user.photoUrl;
+        localStorage.setItem('gt_all_users', JSON.stringify(allUsers));
+      }
+
       closeEditProfileModal();
       renderProfile();
       window.UIService.showToast('Profile updated successfully!', 'success');

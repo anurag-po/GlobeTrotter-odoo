@@ -52,7 +52,7 @@
     <div id="calendar" class="calendar-container">
       <div class="calendar-nav">
         <button id="cal-prev" class="calendar-nav__btn" aria-label="Previous Month"><i class="fas fa-chevron-left"></i></button>
-        <h2 id="cal-title" class="calendar-nav__title">January 2024</h2>
+        <h2 id="cal-title" class="calendar-nav__title">June 2026</h2>
         <button id="cal-next" class="calendar-nav__btn" aria-label="Next Month"><i class="fas fa-chevron-right"></i></button>
       </div>
       <div id="cal-grid" class="calendar-grid">
@@ -60,6 +60,52 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal: Edit Date Occupancy -->
+  <div class="modal-overlay" id="editDateModal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="editDateModalTitle">Schedule / Edit Occupancy</h3>
+        <button type="button" class="modal-close" onclick="window.CalendarModule.closeEditDateModal()">&times;</button>
+      </div>
+      <form id="editDateForm" onsubmit="window.CalendarModule.handleSaveDateOccupancy(event)">
+        <input type="hidden" id="calEditYear">
+        <input type="hidden" id="calEditMonth">
+        <input type="hidden" id="calEditDay">
+        <div class="modal-body">
+          <div style="background: var(--clr-primary-light); color: var(--clr-primary-dark); padding: 10px 14px; border-radius: 6px; font-weight: 700; margin-bottom: 16px;" id="calSelectedDateBanner">
+            Date: June 15, 2026
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trip / Event / Booking Title *</label>
+            <input type="text" id="calEventName" class="form-control" placeholder="e.g. Paris Trip, Mountain Trek, Blocked" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Duration (Days)</label>
+              <input type="number" id="calEventDuration" class="form-control" value="1" min="1" max="31" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color Tag</label>
+              <select id="calEventColor" class="form-control">
+                <option value="blue">Blue (Getaway)</option>
+                <option value="red">Red (Flight / Trip)</option>
+                <option value="green">Green (Adventure)</option>
+                <option value="orange">Orange (Tour)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn--sm" style="background: #FEE2E2; color: #DC2626; margin-right: auto; font-weight: 700;" onclick="window.CalendarModule.handleClearDateOccupancy()">
+            <i class="fas fa-trash-alt"></i> Clear Date
+          </button>
+          <button type="button" class="btn btn--outline" onclick="window.CalendarModule.closeEditDateModal()">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Occupancy</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="js/main.js"></script>
 </body>
