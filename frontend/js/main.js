@@ -577,6 +577,18 @@ const AdminModule = {
       createdAt: '2026-08-01'
     });
 
+    // Registered Anurag Account
+    userMap.set('anuragpo393@gmail.com', {
+      id: '00000000-0000-0000-0000-000000000002',
+      username: 'anuragpo',
+      email: 'anuragpo393@gmail.com',
+      firstName: 'Anurag',
+      lastName: 'P O',
+      role: 'user',
+      status: 'active',
+      createdAt: '2026-08-22'
+    });
+
     apiUsers.forEach(u => {
       if (u && u.email) userMap.set(u.email.toLowerCase(), u);
     });

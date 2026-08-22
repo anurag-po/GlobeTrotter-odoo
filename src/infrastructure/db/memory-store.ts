@@ -109,6 +109,28 @@ export class MemoryStore {
       updatedAt: new Date(),
     };
     this.users.set(adminUser.id, adminUser);
+
+    // Seed Anurag's Registered Account
+    const anuragUser: UserProps = {
+      id: '00000000-0000-0000-0000-000000000002',
+      username: 'anuragpo',
+      email: 'anuragpo393@gmail.com',
+      passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$vU0o1Gz92bJvH7C10H2jKg$Z5i1r7HjH0FjW4Zq4lKk1jG0t3vX4bV1yU9w2kP4mQo',
+      firstName: 'Anurag',
+      lastName: 'P O',
+      phoneNumber: '+919876543210',
+      city: 'Bangalore',
+      country: 'India',
+      additionalInfo: 'Registered GlobeTrotter Explorer',
+      languagePreference: 'en',
+      role: 'user',
+      status: 'active',
+      hasVerifiedEmail: true,
+      notificationPreferences: { email: true, push: true, inApp: true },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(anuragUser.id, anuragUser);
   }
 }
 
