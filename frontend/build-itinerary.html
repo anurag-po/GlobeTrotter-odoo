@@ -846,9 +846,6 @@
 
     document.getElementById('btn-open-add-stop').addEventListener('click', () => {
       document.getElementById('form-add-stop').reset();
-      document.getElementById('input-duration').value = '2 Days';
-      document.getElementById('input-dates').value = '23 Oct – 25 Oct';
-      document.getElementById('input-budget').value = '12000';
       modalAddStop.classList.add('active');
     });
 
@@ -872,24 +869,22 @@
         id: `stop-${Date.now()}`,
         city: city,
         duration: duration || '2 Days',
-        dateRange: dateRange || '23 Oct – 25 Oct',
+        dateRange: dateRange || 'Upcoming',
         budget: budget,
         activities: [
-          { id: `act-${Date.now()}`, title: `${city} City Exploration & Landmarks`, time: '10:00 AM', cost: 500, category: 'Sightseeing' }
+          { id: `act-${Date.now()}`, title: `${city} City Exploration & Landmarks`, time: '10:00 AM', cost: Math.round(budget * 0.2), category: 'Sightseeing' }
         ]
       };
 
       builderData.stops.push(newStop);
       modalAddStop.classList.remove('active');
       renderStops();
+      if (window.UIService) window.UIService.showToast(`Stop "${city}" added to itinerary!`, 'success');
     });
 
     window.openAddActivityModal = function(stopId) {
       document.getElementById('form-add-activity').reset();
       document.getElementById('input-act-stop-id').value = stopId;
-      document.getElementById('input-act-time').value = '10:00 AM';
-      document.getElementById('input-act-cost').value = '750';
-      document.getElementById('input-act-category').value = 'Sightseeing';
       modalAddActivity.classList.add('active');
     };
 
@@ -915,7 +910,7 @@
         const newAct = {
           id: `act-${Date.now()}`,
           title: title,
-          time: time || '10:00 AM',
+          time: time || 'Flexible Time',
           cost: cost,
           category: category || 'Sightseeing'
         };
@@ -923,21 +918,27 @@
         stop.budget += cost;
         modalAddActivity.classList.remove('active');
         renderStops();
+        if (window.UIService) window.UIService.showToast(`Activity "${title}" (₹${cost}) added!`, 'success');
       }
     });
 
     /* Share, Export, and Save Actions */
     document.getElementById('btn-share').addEventListener('click', () => {
-      alert('Shareable itinerary link copied to clipboard!');
+      if (window.UIService) window.UIService.showToast('Shareable itinerary link copied to clipboard!', 'info');
+      else alert('Shareable itinerary link copied to clipboard!');
     });
 
     document.getElementById('btn-export').addEventListener('click', () => {
-      alert('Generating high-res PDF itinerary...');
+      if (window.UIService) window.UIService.showToast('Generating and downloading itinerary summary...', 'info');
+      else alert('Generating itinerary...');
     });
 
     document.getElementById('btn-save-itinerary').addEventListener('click', () => {
-      alert('🎉 Itinerary successfully constructed and saved to My Trips!');
-      window.location.href = 'trips.html';
+      localStorage.setItem('gt_saved_itinerary', JSON.stringify(builderData));
+      if (window.UIService) window.UIService.showToast('Itinerary saved to My Trips!', 'success');
+      setTimeout(() => {
+        window.location.href = 'trips.html';
+      }, 500);
     });
 
     // Close modal on backdrop click

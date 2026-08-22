@@ -66,6 +66,18 @@ const AuthService = {
         return adminUser;
       }
 
+      // Check if user is in registered users store
+      const allUsers = AdminModule.getUsers();
+      const matched = allUsers.find(u => u.email.toLowerCase() === identifier.toLowerCase() || u.username.toLowerCase() === identifier.toLowerCase());
+      if (matched) {
+        if (matched.status === 'suspended') {
+          throw new Error('This account has been suspended by an administrator.');
+        }
+        localStorage.setItem('gt_token', 'mock-user-token');
+        localStorage.setItem('gt_user', JSON.stringify(matched));
+        return matched;
+      }
+
       if (err.message && (err.message.includes('fetch') || err.message.includes('Failed') || err.message.includes('NetworkError'))) {
         const demoUser = {
           id: 'mock-user-' + Date.now(),
@@ -104,22 +116,27 @@ const AuthService = {
       localStorage.setItem('gt_user', JSON.stringify(data.user));
       return data.user;
     } catch (err) {
-      if (err.message && (err.message.includes('fetch') || err.message.includes('Failed') || err.message.includes('NetworkError'))) {
-        const demoUser = {
-          id: 'mock-user-' + Date.now(),
-          username: formData.username || formData.email.split('@')[0],
-          email: formData.email,
-          firstName: formData.firstName || 'Traveler',
-          lastName: formData.lastName || '',
-          role: formData.email === ADMIN_EMAIL ? 'admin' : 'user',
-          status: 'active',
-          hasVerifiedEmail: true,
-        };
-        localStorage.setItem('gt_token', 'mock-user-token');
-        localStorage.setItem('gt_user', JSON.stringify(demoUser));
-        return demoUser;
+      const demoUser = {
+        id: 'mock-user-' + Date.now(),
+        username: formData.username || formData.email.split('@')[0],
+        email: formData.email,
+        firstName: formData.firstName || 'Traveler',
+        lastName: formData.lastName || '',
+        role: formData.email === ADMIN_EMAIL ? 'admin' : 'user',
+        status: 'active',
+        hasVerifiedEmail: true,
+      };
+
+      // Register into all users store
+      const users = AdminModule.getUsers();
+      if (!users.some(u => u.email === demoUser.email)) {
+        users.push(demoUser);
+        AdminModule.saveUsers(users);
       }
-      throw err;
+
+      localStorage.setItem('gt_token', 'mock-user-token');
+      localStorage.setItem('gt_user', JSON.stringify(demoUser));
+      return demoUser;
     }
   },
 
@@ -335,9 +352,16 @@ const CalendarModule = {
 };
 
 // ============================================================
-// 4. Admin Module (Places & Activities Management)
+// 4. Admin Module (Users, Places & Activities Management)
 // ============================================================
 const AdminModule = {
+  defaultUsers: [
+    { id: 'usr-1', username: 'admin1234', email: 'admin1234@temporaryaccount.none', firstName: 'GlobeTrotter', lastName: 'Admin', role: 'admin', status: 'active', createdAt: '2026-08-01' },
+    { id: 'usr-2', username: 'karan_patel', email: 'karan.patel@explorer.com', firstName: 'Karan', lastName: 'Patel', role: 'user', status: 'active', createdAt: '2026-08-10' },
+    { id: 'usr-3', username: 'rohan_verma', email: 'rohan@example.com', firstName: 'Rohan', lastName: 'Verma', role: 'user', status: 'active', createdAt: '2026-08-15' },
+    { id: 'usr-4', username: 'priya_sharma', email: 'priya.sharma@example.com', firstName: 'Priya', lastName: 'Sharma', role: 'user', status: 'deletion_requested', createdAt: '2026-08-18' },
+  ],
+
   defaultPlaces: [
     { id: 'place-1', name: 'Paris', country: 'France', region: 'Europe', avgCost: '18,500', satisfaction: '94.2%', visits: '14,820', description: 'The City of Light, famous for romance, art, and world-class cuisine.' },
     { id: 'place-2', name: 'Tokyo', country: 'Japan', region: 'East Asia', avgCost: '22,000', satisfaction: '96.8%', visits: '11,450', description: 'Ultra-modern metropolis blended with timeless historic shrines.' },
@@ -350,14 +374,28 @@ const AdminModule = {
     { id: 'act-1', name: 'Eiffel Tower Summit Tour', place: 'Paris', category: 'Sightseeing', cost: '3,200', duration: '2.5 hrs', description: 'Ascent to the top observatory of the Eiffel Tower with panoramic views.' },
     { id: 'act-2', name: 'Shibuya Crossing & Ramen Walk', place: 'Tokyo', category: 'Food & Culture', cost: '4,500', duration: '3 hrs', description: 'Guided street food and ramen tasting through neon Shibuya alleys.' },
     { id: 'act-3', name: 'Lake Pichola Sunset Boat Cruise', place: 'Jaipur & Udaipur', category: 'Heritage', cost: '1,800', duration: '1.5 hrs', description: 'Private scenic boat ride around Jag Mandir and City Palace.' },
-    { id: 'act-4', name: 'Colosseum Gladiator Arena Access', place: 'Rome', category: 'Culture', cost: '3,800', duration: '3 hrs', description: 'Exclusive floor access with archaeologist historian guide.' },
+    { id: 'act-4', name: 'Colosseum Gladiator Arena Access', place: 'Rome', category: 'Sightseeing', cost: '3,800', duration: '3 hrs', description: 'Exclusive floor access with archaeologist historian guide.' },
+    { id: 'act-5', name: 'Paragliding Tandem Joyride', place: 'Bir Billing', category: 'Adventure', cost: '3,500', duration: '2.0 hrs', description: 'World-renowned takeoff site over Kangra Valley with certified instructors.' }
   ],
+
+  getUsers() {
+    try {
+      const stored = localStorage.getItem('gt_all_users');
+      return stored ? JSON.parse(stored) : this.defaultUsers;
+    } catch {
+      return this.defaultUsers;
+    }
+  },
+
+  saveUsers(users) {
+    localStorage.setItem('gt_all_users', JSON.stringify(users));
+  },
 
   getPlaces() {
     try {
       const stored = localStorage.getItem('gt_admin_places');
       return stored ? JSON.parse(stored) : this.defaultPlaces;
-    } catch (e) {
+    } catch {
       return this.defaultPlaces;
     }
   },
@@ -370,7 +408,7 @@ const AdminModule = {
     try {
       const stored = localStorage.getItem('gt_admin_activities');
       return stored ? JSON.parse(stored) : this.defaultActivities;
-    } catch (e) {
+    } catch {
       return this.defaultActivities;
     }
   },
@@ -393,12 +431,171 @@ const AdminModule = {
       });
     });
 
-    if (document.getElementById('chart-users')) {
-      this.drawPieChart('chart-users');
-    }
-
+    this.renderUsersList();
     this.renderPlacesList();
     this.renderActivitiesList();
+
+    if (document.getElementById('chart-bar-container')) {
+      this.drawBarChart('chart-bar-container');
+    }
+  },
+
+  renderUsersList() {
+    const container = document.getElementById('chart-users');
+    if (!container) return;
+
+    const users = this.getUsers();
+
+    let tableRows = users.map((u) => {
+      const isPrimaryAdmin = u.email === ADMIN_EMAIL;
+      const isAdminRole = u.role === 'admin';
+      const isDeletion = u.status === 'deletion_requested';
+      const isSuspended = u.status === 'suspended';
+      const initial = (u.firstName || u.username || 'U').charAt(0).toUpperCase();
+
+      return `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center;">
+              <div class="user-avatar-sm" style="${isAdminRole ? 'background: linear-gradient(135deg, #DC2626, #F59E0B);' : ''}">${initial}</div>
+              <div>
+                <strong>${u.firstName || ''} ${u.lastName || ''}</strong>
+                <div style="font-size: 0.78rem; color: var(--clr-text-muted);">@${u.username || 'traveler'}</div>
+              </div>
+            </div>
+          </td>
+          <td>${u.email}</td>
+          <td>
+            <span class="badge" style="background: ${isAdminRole ? '#FEE2E2' : 'var(--clr-primary-light)'}; color: ${isAdminRole ? '#DC2626' : 'var(--clr-primary)'}; font-weight: 700;">
+              ${isAdminRole ? 'Admin' : 'Explorer'}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${isDeletion ? '' : (isSuspended ? '' : 'badge--completed')}" style="${isDeletion ? 'background: #FEE2E2; color: #DC2626;' : (isSuspended ? 'background: #E2E8F0; color: #64748B;' : '')}">
+              ${isDeletion ? 'Deletion Requested' : (isSuspended ? 'Suspended' : 'Active')}
+            </span>
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            ${!isPrimaryAdmin ? `
+              ${!isAdminRole ? `
+                <button type="button" class="btn btn--sm" style="background: #E0E7FF; color: #4338CA; font-weight: 700; border-radius: 4px; padding: 4px 8px; margin-right: 4px;" onclick="window.AdminModule.promoteToAdmin('${u.id}')" title="Grant Administrator Rights">
+                  <i class="fas fa-shield-alt"></i> Make Admin
+                </button>
+              ` : `
+                <button type="button" class="btn btn--sm" style="background: #FEF3C7; color: #D97706; font-weight: 700; border-radius: 4px; padding: 4px 8px; margin-right: 4px;" onclick="window.AdminModule.revokeAdmin('${u.id}')" title="Revoke Admin Rights">
+                  <i class="fas fa-user-minus"></i> Revoke Admin
+                </button>
+              `}
+              
+              <button type="button" class="btn btn--sm" style="background: ${isSuspended ? '#DCFCE7' : '#F1F5F9'}; color: ${isSuspended ? '#15803D' : '#475569'}; font-weight: 700; border-radius: 4px; padding: 4px 8px; margin-right: 4px;" onclick="window.AdminModule.toggleSuspendUser('${u.id}')">
+                ${isSuspended ? '<i class="fas fa-check"></i> Unsuspend' : '<i class="fas fa-ban"></i> Suspend'}
+              </button>
+
+              ${isDeletion ? `
+                <button type="button" class="btn btn--sm" style="background: #DC2626; color: #FFFFFF; font-weight: 700; border-radius: 4px; padding: 4px 8px;" onclick="window.AdminModule.approveDataDeletion('${u.id}')" title="Approve GDPR Account Deletion">
+                  <i class="fas fa-user-xmark"></i> Approve Deletion (Purge)
+                </button>
+              ` : `
+                <button type="button" class="btn btn--sm" style="background: #FEE2E2; color: #DC2626; font-weight: 700; border-radius: 4px; padding: 4px 8px;" onclick="window.AdminModule.deleteUser('${u.id}')" title="Delete User Record">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              `}
+            ` : `<span style="font-size: 0.78rem; color: var(--clr-text-muted); font-weight: 700;">Super Admin</span>`}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--clr-border); flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text); margin: 0;">User Directory &amp; RBAC Permissions (${users.length} Users)</h3>
+            <p style="font-size: 0.82rem; color: var(--clr-text-muted); margin: 4px 0 0 0;">Manage platform accounts, promote administrators, revoke credentials, and review GDPR deletion requests.</p>
+          </div>
+          <button type="button" class="btn btn--primary btn--sm" style="font-weight: 700;" onclick="document.getElementById('adminAddUserModal').classList.add('active')">
+            <i class="fas fa-user-shield"></i> + Add Administrator
+          </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>User Account</th>
+                <th>Email Address</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th style="text-align: right;">Administrative Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  },
+
+  promoteToAdmin(userId) {
+    const users = this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (!target) return;
+
+    target.role = 'admin';
+    this.saveUsers(users);
+    this.renderUsersList();
+    UIService.showToast(`User ${target.email} has been promoted to Administrator!`, 'success');
+  },
+
+  revokeAdmin(userId) {
+    const users = this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (!target) return;
+
+    target.role = 'user';
+    this.saveUsers(users);
+    this.renderUsersList();
+    UIService.showToast(`Administrator rights revoked for ${target.email}.`, 'info');
+  },
+
+  toggleSuspendUser(userId) {
+    const users = this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (!target) return;
+
+    target.status = target.status === 'suspended' ? 'active' : 'suspended';
+    this.saveUsers(users);
+    this.renderUsersList();
+    UIService.showToast(`User ${target.email} is now ${target.status}.`, target.status === 'suspended' ? 'warning' : 'success');
+  },
+
+  approveDataDeletion(userId) {
+    let users = this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (!target) return;
+
+    const confirmPurge = confirm(`Are you sure you want to approve GDPR Data Deletion for ${target.email}?\n\nThis will permanently purge their profile, itineraries, and records.`);
+    if (!confirmPurge) return;
+
+    users = users.filter(u => u.id !== userId);
+    this.saveUsers(users);
+    this.renderUsersList();
+    UIService.showToast(`User data for ${target.email} permanently purged under GDPR request.`, 'success');
+  },
+
+  deleteUser(userId) {
+    let users = this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (!target) return;
+
+    if (confirm(`Remove user ${target.email}?`)) {
+      users = users.filter(u => u.id !== userId);
+      this.saveUsers(users);
+      this.renderUsersList();
+      UIService.showToast(`User ${target.email} removed.`, 'info');
+    }
   },
 
   renderPlacesList() {
@@ -434,11 +631,11 @@ const AdminModule = {
       <div style="width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--clr-border); flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text);">Destination Catalog (${places.length} Places)</h3>
-            <p style="font-size: 0.82rem; color: var(--clr-text-muted);">Manage global destinations, regional pricing, and traveler recommendations.</p>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text); margin: 0;">Destination Catalog (${places.length} Places)</h3>
+            <p style="font-size: 0.82rem; color: var(--clr-text-muted); margin: 4px 0 0 0;">Manage global destinations, regional pricing, and traveler recommendations.</p>
           </div>
           <button type="button" class="btn btn--primary btn--sm" style="font-weight: 700;" onclick="window.AdminModule.openAddPlaceModal()">
-            <i class="fas fa-plus"></i> Add Place
+            <i class="fas fa-plus"></i> + Add Place
           </button>
         </div>
         <ul style="list-style: none; padding: 0; margin: 0;">
@@ -480,11 +677,11 @@ const AdminModule = {
       <div style="width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--clr-border); flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text);">Curated Activities Catalog (${activities.length} Items)</h3>
-            <p style="font-size: 0.82rem; color: var(--clr-text-muted);">Manage bookable excursions, tickets, tours, and price details.</p>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text); margin: 0;">Curated Activities Catalog (${activities.length} Items)</h3>
+            <p style="font-size: 0.82rem; color: var(--clr-text-muted); margin: 4px 0 0 0;">Manage bookable excursions, tickets, tours, and price details.</p>
           </div>
           <button type="button" class="btn btn--primary btn--sm" style="font-weight: 700;" onclick="window.AdminModule.openAddActivityModal()">
-            <i class="fas fa-plus"></i> Add Activity
+            <i class="fas fa-plus"></i> + Add Activity
           </button>
         </div>
         <ul style="list-style: none; padding: 0; margin: 0;">
@@ -646,18 +843,33 @@ const AdminModule = {
     modal.classList.add('active');
   },
 
-  drawPieChart(containerId) {
+  drawBarChart(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    const bars = [
+      { label: 'Jan', value: 70, color: '#1A56DB' },
+      { label: 'Feb', value: 50, color: '#FF5A5F' },
+      { label: 'Mar', value: 85, color: '#10B981' },
+      { label: 'Apr', value: 40, color: '#F59E0B' },
+      { label: 'May', value: 65, color: '#0284C7' },
+      { label: 'Jun', value: 95, color: '#1A56DB' },
+    ];
+
+    let barsHtml = '';
+    bars.forEach((bar, i) => {
+      const x = 20 + i * 45;
+      const h = bar.value * 1.5;
+      const y = 160 - h;
+      barsHtml += `<rect x="${x}" y="${y}" width="30" height="${h}" fill="${bar.color}" rx="4"/>`;
+      barsHtml += `<text x="${x + 15}" y="178" text-anchor="middle" font-size="10" font-weight="600" fill="#64748B">${bar.label}</text>`;
+    });
+
     container.innerHTML = `
-      <svg viewBox="0 0 200 200" width="200" height="200">
-        <circle cx="100" cy="100" r="90" fill="#1A56DB" />
-        <path d="M100,100 L100,10 A90,90 0 0,1 190,100 Z" fill="#FF5A5F" />
-        <path d="M100,100 L190,100 A90,90 0 0,1 145,185 Z" fill="#10B981" />
-        <path d="M100,100 L145,185 A90,90 0 0,1 55,185 Z" fill="#F59E0B" />
-        <circle cx="100" cy="100" r="45" fill="white" />
-        <text x="100" y="105" text-anchor="middle" font-size="13" font-weight="800" fill="#0F172A">Users</text>
+      <svg viewBox="0 0 300 200" width="100%" height="220">
+        <line x1="15" y1="10" x2="15" y2="165" stroke="#E2E8F0" stroke-width="1"/>
+        <line x1="15" y1="165" x2="290" y2="165" stroke="#E2E8F0" stroke-width="1"/>
+        ${barsHtml}
       </svg>
     `;
   },
@@ -695,6 +907,38 @@ window.handleAdminAddActivity = function (e) {
   AdminModule.addActivity({ name, place, category, cost, duration, description });
   document.getElementById('adminAddActModal').classList.remove('active');
   document.getElementById('adminActForm').reset();
+};
+
+window.handleAdminCreateAdmin = function (e) {
+  e.preventDefault();
+  const firstName = document.getElementById('admNewFirst').value.trim();
+  const lastName = document.getElementById('admNewLast').value.trim();
+  const email = document.getElementById('admNewEmail').value.trim();
+  const password = document.getElementById('admNewPass').value;
+
+  const users = AdminModule.getUsers();
+  if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+    UIService.showToast('User with this email already exists!', 'error');
+    return;
+  }
+
+  const newAdmin = {
+    id: 'usr-' + Date.now(),
+    username: email.split('@')[0],
+    email,
+    firstName,
+    lastName,
+    role: 'admin',
+    status: 'active',
+    createdAt: new Date().toISOString().split('T')[0]
+  };
+
+  users.unshift(newAdmin);
+  AdminModule.saveUsers(users);
+  AdminModule.renderUsersList();
+  document.getElementById('adminAddUserModal').classList.remove('active');
+  document.getElementById('adminNewAdminForm').reset();
+  UIService.showToast(`New Administrator "${firstName} ${lastName}" created!`, 'success');
 };
 
 // DOM Bootstrapper & Lifecycle

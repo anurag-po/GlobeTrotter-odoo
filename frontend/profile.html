@@ -11,6 +11,41 @@
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .avatar-initial {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--clr-primary), #0284C7);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      box-shadow: var(--shadow-md);
+      border: 4px solid var(--clr-white);
+    }
+    .profile-hero {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      background: var(--clr-white);
+      padding: 32px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--clr-border);
+      margin-bottom: 32px;
+    }
+    .privacy-card {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-top: 32px;
+    }
+  </style>
 </head>
 <body>
 
@@ -37,13 +72,27 @@
     
     <!-- Profile Hero Section -->
     <section class="profile-hero">
-      <div class="profile-avatar" aria-label="Profile Avatar">
-        <img id="profAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="User Profile">
+      <div id="profAvatarContainer" class="profile-avatar" aria-label="Profile Avatar">
+        <div id="profInitialAvatar" class="avatar-initial">T</div>
+        <img id="profImgAvatar" src="" alt="Profile Image" style="display: none; width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--clr-white); box-shadow: var(--shadow-md);">
       </div>
-      <div class="profile-details">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-          <h2 id="profHeading" style="margin: 0;">Explorer Profile</h2>
-          <span id="profRoleBadge" class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-weight: 700;">Traveler</span>
+
+      <div class="profile-details" style="flex: 1;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h2 id="profHeading" style="margin: 0; font-size: 1.6rem; color: var(--clr-text);">Explorer Profile</h2>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <span id="profRoleBadge" class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-weight: 700;">Traveler</span>
+              <span id="profStatusBadge" class="badge badge--completed">Active</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--primary btn--sm" onclick="openEditProfileModal()" style="font-weight: 700;">
+            <i class="fas fa-user-edit"></i> Edit Profile
+          </button>
+        </div>
+
+        <div id="deletionNotice" style="display: none; background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;">
+          <i class="fas fa-exclamation-triangle"></i> <strong>Data Deletion Requested:</strong> Your request to permanently purge all profile data is pending administrator approval.
         </div>
         
         <div class="profile-field">
@@ -52,12 +101,12 @@
         </div>
 
         <div class="profile-field">
-          <span class="profile-field__label">Email</span>
+          <span class="profile-field__label">Email Address</span>
           <span class="profile-field__value" id="profEmail">—</span>
         </div>
 
         <div class="profile-field">
-          <span class="profile-field__label">Phone</span>
+          <span class="profile-field__label">Phone Number</span>
           <span class="profile-field__value" id="profPhone">—</span>
         </div>
 
@@ -73,138 +122,189 @@
       </div>
     </section>
 
-    <!-- Preplanned Trips Section -->
-    <section>
-      <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Preplanned Trips</h2>
-      <div class="grid grid--3">
-        
-        <!-- Preplanned Trip 1 -->
-        <div class="card card--thumb">
-          <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=250&fit=crop" alt="Paris" class="card__img">
-          <div class="card__content">
-            <h3 class="card__title">Paris &amp; Swiss Alps Explorer</h3>
-            <p class="card__subtitle">Oct 12, 2024 – Oct 20, 2024 &bull; 8 Days</p>
-            <p class="card__body">Scenic mountain rails, Eiffel Tower dinner, and boutique fondue tastings.</p>
-          </div>
-          <div class="card__footer">
-            <a href="itinerary.html" class="btn btn--primary btn--sm">View</a>
-          </div>
+    <!-- Data & Privacy Section (GDPR Data Deletion) -->
+    <section class="privacy-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h3 style="margin: 0 0 6px 0; color: #92400E; font-size: 1.15rem;">
+            <i class="fas fa-shield-alt"></i> Privacy &amp; Data Deletion Request (GDPR / CCPA)
+          </h3>
+          <p style="margin: 0; color: #78350F; font-size: 0.88rem; max-width: 600px;">
+            Under global privacy standards, you can request full permanent removal of your account, created itineraries, reviews, and personal data from GlobeTrotter servers.
+          </p>
         </div>
-
-        <!-- Preplanned Trip 2 -->
-        <div class="card card--thumb">
-          <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=250&fit=crop" alt="Tokyo" class="card__img">
-          <div class="card__content">
-            <h3 class="card__title">Tokyo &amp; Kyoto Cultural Trail</h3>
-            <p class="card__subtitle">Nov 05, 2024 – Nov 15, 2024 &bull; 10 Days</p>
-            <p class="card__body">Historic temples, Shinkansen bullet train rides, and authentic tea ceremonies.</p>
-          </div>
-          <div class="card__footer">
-            <a href="itinerary.html" class="btn btn--primary btn--sm">View</a>
-          </div>
-        </div>
-
-        <!-- Preplanned Trip 3 -->
-        <div class="card card--thumb">
-          <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=250&fit=crop" alt="Bali" class="card__img">
-          <div class="card__content">
-            <h3 class="card__title">Bali Tropical Escape</h3>
-            <p class="card__subtitle">Dec 22, 2024 – Dec 30, 2024 &bull; 8 Days</p>
-            <p class="card__body">Lush Ubud rice terraces, private beachfront villa, and sunset surf sessions.</p>
-          </div>
-          <div class="card__footer">
-            <a href="itinerary.html" class="btn btn--primary btn--sm">View</a>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Previous Trips Section -->
-    <section>
-      <h2 class="section-title"><i class="fas fa-plane"></i> Previous Trips</h2>
-      <div class="grid grid--3">
-        
-        <!-- Previous Trip 1 -->
-        <div class="card card--thumb">
-          <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=250&fit=crop" alt="Rome" class="card__img">
-          <div class="card__content">
-            <h3 class="card__title">Amalfi Coast &amp; Rome Odyssey</h3>
-            <p class="card__subtitle">Jun 10, 2024 – Jun 18, 2024 &bull; 8 Days</p>
-            <p class="card__body">Colosseum guided tour, Positano cliffside dining, and Capri yacht cruise.</p>
-          </div>
-          <div class="card__footer">
-            <a href="itinerary.html" class="btn btn--primary btn--sm">View</a>
-          </div>
-        </div>
-
-        <!-- Previous Trip 2 -->
-        <div class="card card--thumb">
-          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop" alt="Dubai" class="card__img">
-          <div class="card__content">
-            <h3 class="card__title">Dubai &amp; Abu Dhabi Highlights</h3>
-            <p class="card__subtitle">Mar 15, 2024 – Mar 22, 2024 &bull; 7 Days</p>
-            <p class="card__body">Desert dune safaris, Burj Khalifa observatory, and Sheikh Zayed Mosque visit.</p>
-          </div>
-          <div class="card__footer">
-            <a href="itinerary.html" class="btn btn--primary btn--sm">View</a>
-          </div>
-        </div>
-
-        <!-- Previous Trip 3 -->
-        <div class="card card--thumb">
-          <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=250&fit=crop" alt="New York" class="card__img">
-          <div class="card__content">
-            <h3 class="card__title">New York Autumn Break</h3>
-            <p class="card__subtitle">Sep 18, 2023 – Sep 24, 2023 &bull; 6 Days</p>
-            <p class="card__body">Central Park foliage walks, Broadway musical night, and rooftop skyline lounge.</p>
-          </div>
-          <div class="card__footer">
-            <a href="itinerary.html" class="btn btn--primary btn--sm">View</a>
-          </div>
-        </div>
-
+        <button type="button" id="btnRequestDelete" class="btn btn--sm" style="background: #DC2626; color: #FFFFFF; font-weight: 700; border-radius: 6px; padding: 8px 16px;" onclick="requestDataDeletion()">
+          <i class="fas fa-trash-alt"></i> Request Data Deletion
+        </button>
       </div>
     </section>
 
   </main>
 
+  <!-- Modal: Edit Profile -->
+  <div class="modal-overlay" id="editProfileModal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Edit Personal Profile</h3>
+        <button type="button" class="modal-close" onclick="closeEditProfileModal()">&times;</button>
+      </div>
+      <form id="editProfileForm" onsubmit="handleSaveProfile(event)">
+        <div class="modal-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">First Name *</label>
+              <input type="text" id="editFirst" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name *</label>
+              <input type="text" id="editLast" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" id="editPhone" class="form-control" placeholder="+91 98765 43210">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input type="text" id="editCity" class="form-control" placeholder="Mumbai">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Country</label>
+              <input type="text" id="editCountry" class="form-control" placeholder="India">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Profile Image URL (Leave blank to use Initial)</label>
+            <input type="url" id="editPhotoUrl" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn--outline" onclick="closeEditProfileModal()">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/main.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function renderProfile() {
       const user = window.AuthService.getCurrentUser();
       if (!user) {
-        window.location.href = 'index.html';
+        window.location.replace('login.html');
         return;
       }
 
-      const name = (user.firstName || '') + (user.lastName ? ' ' + user.lastName : '') || user.username || 'Traveler';
-      const headingEl = document.getElementById('profHeading');
-      const badgeEl = document.getElementById('profRoleBadge');
-      const nameEl = document.getElementById('profName');
-      const emailEl = document.getElementById('profEmail');
-      const phoneEl = document.getElementById('profPhone');
-      const cityEl = document.getElementById('profCity');
-      const countryEl = document.getElementById('profCountry');
-      const avatarEl = document.getElementById('profAvatar');
+      const firstName = user.firstName || user.username || 'Traveler';
+      const fullName = (user.firstName || '') + (user.lastName ? ' ' + user.lastName : '') || user.username || 'Traveler';
+      const initial = firstName.charAt(0).toUpperCase() || 'T';
 
-      if (headingEl) headingEl.textContent = name;
-      if (nameEl) nameEl.textContent = name;
-      if (emailEl) emailEl.textContent = user.email || '—';
-      if (phoneEl) phoneEl.textContent = user.phoneNumber || '+91 98765 43210';
-      if (cityEl) cityEl.textContent = user.city || 'Global City';
-      if (countryEl) countryEl.textContent = user.country || 'India';
-      if (badgeEl) {
-        badgeEl.textContent = user.role === 'admin' ? 'System Admin' : 'Explorer';
-        if (user.role === 'admin') {
-          badgeEl.style.background = 'var(--clr-accent)';
-          badgeEl.style.color = '#fff';
-        }
+      document.getElementById('profHeading').textContent = fullName;
+      document.getElementById('profName').textContent = fullName;
+      document.getElementById('profEmail').textContent = user.email || '—';
+      document.getElementById('profPhone').textContent = user.phoneNumber || user.phone || '—';
+      document.getElementById('profCity').textContent = user.city || '—';
+      document.getElementById('profCountry').textContent = user.country || '—';
+
+      const initialEl = document.getElementById('profInitialAvatar');
+      const imgEl = document.getElementById('profImgAvatar');
+
+      if (user.photoUrl && user.photoUrl.trim() !== '') {
+        imgEl.src = user.photoUrl;
+        imgEl.style.display = 'block';
+        initialEl.style.display = 'none';
+      } else {
+        initialEl.textContent = initial;
+        initialEl.style.display = 'flex';
+        imgEl.style.display = 'none';
       }
-      if (avatarEl && user.photoUrl) {
-        avatarEl.src = user.photoUrl;
+
+      const roleBadge = document.getElementById('profRoleBadge');
+      if (user.role === 'admin' || user.email === 'admin1234@temporaryaccount.none') {
+        roleBadge.textContent = 'System Admin';
+        roleBadge.style.background = 'var(--clr-accent)';
+        roleBadge.style.color = '#fff';
+      } else {
+        roleBadge.textContent = 'Explorer';
       }
-    });
+
+      const statusBadge = document.getElementById('profStatusBadge');
+      const deletionNotice = document.getElementById('deletionNotice');
+      const deleteBtn = document.getElementById('btnRequestDelete');
+
+      if (user.status === 'deletion_requested') {
+        statusBadge.textContent = 'Deletion Requested';
+        statusBadge.className = 'badge';
+        statusBadge.style.background = '#FEE2E2';
+        statusBadge.style.color = '#DC2626';
+        deletionNotice.style.display = 'block';
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-clock"></i> Deletion Pending Approval';
+      } else {
+        statusBadge.textContent = 'Active';
+        statusBadge.className = 'badge badge--completed';
+        deletionNotice.style.display = 'none';
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Request Data Deletion';
+      }
+    }
+
+    function openEditProfileModal() {
+      const user = window.AuthService.getCurrentUser() || {};
+      document.getElementById('editFirst').value = user.firstName || '';
+      document.getElementById('editLast').value = user.lastName || '';
+      document.getElementById('editPhone').value = user.phoneNumber || user.phone || '';
+      document.getElementById('editCity').value = user.city || '';
+      document.getElementById('editCountry').value = user.country || '';
+      document.getElementById('editPhotoUrl').value = user.photoUrl || '';
+      document.getElementById('editProfileModal').classList.add('active');
+    }
+
+    function closeEditProfileModal() {
+      document.getElementById('editProfileModal').classList.remove('active');
+    }
+
+    function handleSaveProfile(e) {
+      e.preventDefault();
+      const user = window.AuthService.getCurrentUser() || {};
+      user.firstName = document.getElementById('editFirst').value.trim();
+      user.lastName = document.getElementById('editLast').value.trim();
+      user.phoneNumber = document.getElementById('editPhone').value.trim();
+      user.city = document.getElementById('editCity').value.trim();
+      user.country = document.getElementById('editCountry').value.trim();
+      user.photoUrl = document.getElementById('editPhotoUrl').value.trim();
+
+      localStorage.setItem('gt_user', JSON.stringify(user));
+      closeEditProfileModal();
+      renderProfile();
+      window.UIService.showToast('Profile updated successfully!', 'success');
+      window.UIService.updateNavbarAuth();
+    }
+
+    function requestDataDeletion() {
+      const confirmDelete = confirm('Are you sure you want to request permanent account and data deletion under GDPR/CCPA?\n\nAn administrator will review and purge your records.');
+      if (!confirmDelete) return;
+
+      const user = window.AuthService.getCurrentUser();
+      if (!user) return;
+
+      user.status = 'deletion_requested';
+      localStorage.setItem('gt_user', JSON.stringify(user));
+
+      // Sync with registered users store for admin
+      let allUsers = JSON.parse(localStorage.getItem('gt_all_users') || '[]');
+      const matchIndex = allUsers.findIndex(u => u.email === user.email);
+      if (matchIndex >= 0) {
+        allUsers[matchIndex].status = 'deletion_requested';
+        localStorage.setItem('gt_all_users', JSON.stringify(allUsers));
+      }
+
+      renderProfile();
+      window.UIService.showToast('Account data deletion request submitted to administrators.', 'warning');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderProfile);
   </script>
 </body>
 </html>
