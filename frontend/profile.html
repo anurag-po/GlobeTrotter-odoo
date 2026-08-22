@@ -33,39 +33,37 @@
     <!-- Profile Hero Section -->
     <section class="profile-hero">
       <div class="profile-avatar" aria-label="Profile Avatar">
-        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Nihaal Ahmed">
+        <img id="profAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="User Profile">
       </div>
       <div class="profile-details">
-        <h2>User Profile</h2>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h2 id="profHeading" style="margin: 0;">Explorer Profile</h2>
+          <span id="profRoleBadge" class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-weight: 700;">Traveler</span>
+        </div>
         
         <div class="profile-field">
-          <span class="profile-field__label">Name</span>
-          <span class="profile-field__value">Nihaal Ahmed</span>
-          <a href="#" class="profile-field__edit">Edit</a>
+          <span class="profile-field__label">Full Name</span>
+          <span class="profile-field__value" id="profName">—</span>
         </div>
 
         <div class="profile-field">
           <span class="profile-field__label">Email</span>
-          <span class="profile-field__value">nihaal@email.com</span>
-          <a href="#" class="profile-field__edit">Edit</a>
+          <span class="profile-field__value" id="profEmail">—</span>
         </div>
 
         <div class="profile-field">
           <span class="profile-field__label">Phone</span>
-          <span class="profile-field__value">+1 (555) 234-5678</span>
-          <a href="#" class="profile-field__edit">Edit</a>
+          <span class="profile-field__value" id="profPhone">—</span>
         </div>
 
         <div class="profile-field">
           <span class="profile-field__label">City</span>
-          <span class="profile-field__value">San Francisco</span>
-          <a href="#" class="profile-field__edit">Edit</a>
+          <span class="profile-field__value" id="profCity">—</span>
         </div>
 
         <div class="profile-field">
           <span class="profile-field__label">Country</span>
-          <span class="profile-field__value">United States</span>
-          <a href="#" class="profile-field__edit">Edit</a>
+          <span class="profile-field__value" id="profCountry">—</span>
         </div>
       </div>
     </section>
@@ -167,5 +165,41 @@
   </main>
 
   <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.AuthService.getCurrentUser();
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const name = (user.firstName || '') + (user.lastName ? ' ' + user.lastName : '') || user.username || 'Traveler';
+      const headingEl = document.getElementById('profHeading');
+      const badgeEl = document.getElementById('profRoleBadge');
+      const nameEl = document.getElementById('profName');
+      const emailEl = document.getElementById('profEmail');
+      const phoneEl = document.getElementById('profPhone');
+      const cityEl = document.getElementById('profCity');
+      const countryEl = document.getElementById('profCountry');
+      const avatarEl = document.getElementById('profAvatar');
+
+      if (headingEl) headingEl.textContent = name;
+      if (nameEl) nameEl.textContent = name;
+      if (emailEl) emailEl.textContent = user.email || '—';
+      if (phoneEl) phoneEl.textContent = user.phoneNumber || '+91 98765 43210';
+      if (cityEl) cityEl.textContent = user.city || 'Global City';
+      if (countryEl) countryEl.textContent = user.country || 'India';
+      if (badgeEl) {
+        badgeEl.textContent = user.role === 'admin' ? 'System Admin' : 'Explorer';
+        if (user.role === 'admin') {
+          badgeEl.style.background = 'var(--clr-accent)';
+          badgeEl.style.color = '#fff';
+        }
+      }
+      if (avatarEl && user.photoUrl) {
+        avatarEl.src = user.photoUrl;
+      }
+    });
+  </script>
 </body>
 </html>

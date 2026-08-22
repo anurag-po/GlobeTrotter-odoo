@@ -373,5 +373,19 @@
   </main>
 
   <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // If user is not logged in, intercept action buttons on index.html
+      const user = window.AuthService.getCurrentUser();
+      if (!user) {
+        document.querySelectorAll('a[href="itinerary.html"], a[href="trips.html"], a[href="create-trip.html"], a[href="build-itinerary.html"], a[href="profile.html"]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.UIService.openAuthModal('login');
+          });
+        });
+      }
+    });
+  </script>
 </body>
 </html>
