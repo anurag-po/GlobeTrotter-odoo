@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar View — GlobalTrotter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="index.html" class="header__logo">GlobalTrotter</a>
+    <button class="header__hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header__nav">
+      <a href="index.html">Home</a>
+      <a href="trips.html">My Trips</a>
+      <a href="search.html">Explore</a>
+      <a href="community.html">Community</a>
+      <a href="calendar.html" class="active">Calendar</a>
+      <a href="profile.html">Profile</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+    <div class="header__profile" title="Profile"><i class="fas fa-user"></i></div>
+  </header>
+
+  <!-- Search & Filter Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar__search">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" placeholder="Search trips, events, or dates..." aria-label="Search trips">
+    </div>
+    <div class="toolbar__actions">
+      <button class="btn btn--outline" data-dropdown="group"><i class="fas fa-layer-group"></i> Group by</button>
+      <button class="btn btn--outline" data-dropdown="filter"><i class="fas fa-filter"></i> Filter</button>
+      <button class="btn btn--outline" data-dropdown="sort"><i class="fas fa-sort"></i> Sort by</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="page">
+    <h1 class="section-title">Calendar View</h1>
+
+    <div id="calendar" class="calendar-container">
+      <div class="calendar-nav">
+        <button id="cal-prev" class="calendar-nav__btn" aria-label="Previous Month"><i class="fas fa-chevron-left"></i></button>
+        <h2 id="cal-title" class="calendar-nav__title">January 2024</h2>
+        <button id="cal-next" class="calendar-nav__btn" aria-label="Next Month"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div id="cal-grid" class="calendar-grid">
+        <!-- Dynamically rendered by js/main.js -->
+      </div>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
