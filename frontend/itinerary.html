@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Itinerary — GlobeTrotter</title>
+  <title>Trip Itinerary — GlobeTrotter</title>
   <script>
     if (!localStorage.getItem('gt_user')) {
       window.location.replace('login.html');
@@ -11,8 +11,79 @@
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .itinerary-hero-banner {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 28px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(26, 86, 219, 0.9), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      color: #fff;
+      padding: 40px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    .itinerary-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .itinerary-stat-card {
+      background: var(--clr-white);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .itinerary-stat-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--clr-text-muted);
+      margin-bottom: 4px;
+    }
+    .itinerary-stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--clr-text);
+    }
+    .stop-card {
+      background: var(--clr-white);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .stop-header {
+      background: var(--clr-bg);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--clr-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .activity-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .activity-row:last-child {
+      border-bottom: none;
+    }
+  </style>
 </head>
 <body>
+
   <!-- Header Component -->
   <header class="header">
     <a href="index.html" class="header__logo">GlobeTrotter</a>
@@ -31,114 +102,286 @@
     <div class="header__profile" title="Profile"><i class="fas fa-user"></i></div>
   </header>
 
-  <!-- Toolbar / Filter Bar -->
-  <div class="toolbar">
-    <div class="toolbar__search">
-      <i class="fas fa-search search-icon"></i>
-      <input type="text" placeholder="Search activities or expenses...">
-    </div>
-    <div class="toolbar__actions">
-      <button type="button" class="btn btn--outline" data-dropdown="filter">Filter</button>
-      <button type="button" class="btn btn--outline" data-dropdown="sort">Sort by</button>
-    </div>
-  </div>
-
-  <!-- Main Itinerary Content -->
+  <!-- Page Content -->
   <main class="page">
-    <div class="itinerary-header">
-      <h1>Itinerary for Paris, France</h1>
+    
+    <!-- Top Hero Banner for Selected Trip -->
+    <div id="itinHeroBanner" class="itinerary-hero-banner">
+      <div>
+        <span id="itinStatusBadge" class="badge" style="background: rgba(255,255,255,0.25); color: #fff; margin-bottom: 10px;">Ongoing Trip</span>
+        <h1 id="itinTripTitle" style="margin: 6px 0 10px 0; font-size: 2rem; color: #fff;">Trip Itinerary</h1>
+        <div style="font-size: 0.95rem; opacity: 0.95; display: flex; gap: 16px; flex-wrap: wrap;">
+          <span><i class="fas fa-location-dot"></i> <span id="itinDestination">Destination</span></span>
+          <span><i class="fas fa-calendar-alt"></i> <span id="itinDates">Date Range</span></span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <a href="trips.html" class="btn btn--outline" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff; font-weight: 700;">
+          <i class="fas fa-arrow-left"></i> Back to Trips
+        </a>
+        <a href="build-itinerary.html" id="itinEditBuilderBtn" class="btn btn--primary" style="background: #ffffff; color: var(--clr-primary-dark) !important; font-weight: 700;">
+          <i class="fas fa-sliders"></i> Edit in Builder
+        </a>
+      </div>
     </div>
 
-    <!-- Day 1 -->
-    <section class="itinerary-day">
-      <span class="day-label">Day 1</span>
-      <table class="itinerary-table">
-        <thead>
-          <tr>
-            <th style="width: 75%;">Physical Activity</th>
-            <th style="width: 25%; text-align: right;">Expense</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Visit Eiffel Tower</td>
-            <td style="text-align: right; font-weight: 600;">€25</td>
-          </tr>
-          <tr>
-            <td>Lunch at Café de Flore</td>
-            <td style="text-align: right; font-weight: 600;">€35</td>
-          </tr>
-          <tr>
-            <td>Louvre Museum Tour</td>
-            <td style="text-align: right; font-weight: 600;">€17</td>
-          </tr>
-          <tr>
-            <td>Seine River Cruise</td>
-            <td style="text-align: right; font-weight: 600;">€15</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <!-- Quick Stats Breakdown -->
+    <div class="itinerary-stats-row">
+      <div class="itinerary-stat-card">
+        <div class="itinerary-stat-label">Total Estimated Budget</div>
+        <div class="itinerary-stat-val" id="statTotalBudget">₹0</div>
+      </div>
+      <div class="itinerary-stat-card">
+        <div class="itinerary-stat-label">Planned Stops</div>
+        <div class="itinerary-stat-val" id="statStopCount">0 Cities</div>
+      </div>
+      <div class="itinerary-stat-card">
+        <div class="itinerary-stat-label">Per Person Estimate (2 Pax)</div>
+        <div class="itinerary-stat-val" id="statPerPerson">₹0</div>
+      </div>
+      <div class="itinerary-stat-card">
+        <div class="itinerary-stat-label">Itinerary Status</div>
+        <div class="itinerary-stat-val" id="statStatus" style="font-size: 1.15rem; color: var(--clr-primary);">Active</div>
+      </div>
+    </div>
 
-    <!-- Day 2 -->
-    <section class="itinerary-day">
-      <span class="day-label">Day 2</span>
-      <table class="itinerary-table">
-        <thead>
-          <tr>
-            <th style="width: 75%;">Physical Activity</th>
-            <th style="width: 25%; text-align: right;">Expense</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Montmartre Walking Tour</td>
-            <td style="text-align: right; font-weight: 600;">€10</td>
-          </tr>
-          <tr>
-            <td>Sacré-Cœur Basilica</td>
-            <td style="text-align: right; font-weight: 600;">Free</td>
-          </tr>
-          <tr>
-            <td>Shopping at Champs-Élysées</td>
-            <td style="text-align: right; font-weight: 600;">€100</td>
-          </tr>
-          <tr>
-            <td>Dinner at Le Jules Verne</td>
-            <td style="text-align: right; font-weight: 600;">€150</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <!-- Stops & Schedule Section -->
+    <h2 class="section-title"><i class="fas fa-route"></i> Day-by-Day Journey &amp; Stops</h2>
 
-    <!-- Day 3 -->
-    <section class="itinerary-day">
-      <span class="day-label">Day 3</span>
-      <table class="itinerary-table">
-        <thead>
-          <tr>
-            <th style="width: 75%;">Physical Activity</th>
-            <th style="width: 25%; text-align: right;">Expense</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Palace of Versailles Day Trip</td>
-            <td style="text-align: right; font-weight: 600;">€30</td>
-          </tr>
-          <tr>
-            <td>Pastry &amp; Croissant Tasting in Le Marais</td>
-            <td style="text-align: right; font-weight: 600;">€20</td>
-          </tr>
-          <tr>
-            <td>Sunset at Arc de Triomphe Rooftop</td>
-            <td style="text-align: right; font-weight: 600;">€13</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <div id="itinStopsContainer">
+      <!-- Injected by JavaScript -->
+    </div>
+
   </main>
 
   <script src="js/main.js"></script>
+  <script>
+    const DEFAULT_USER_TRIPS = [
+      {
+        id: 'trip-bali',
+        name: 'Bali Beach & Temple Getaway',
+        destination: 'Bali, Indonesia',
+        status: 'ongoing',
+        dates: 'Dec 15 – Dec 22, 2026',
+        budget: 75000,
+        imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&h=500&fit=crop',
+        description: 'Tropical relaxation exploring Ubud rice terraces, Nusa Penida coastal cliffs, and beachfront dining in Seminyak.',
+        stops: [
+          {
+            city: 'Seminyak & Kuta Coast',
+            duration: '3 Days',
+            dateRange: '15 Dec – 17 Dec',
+            budget: 32000,
+            activities: [
+              { title: 'Beachfront Sunset Lounge & Cocktails', time: '05:30 PM', category: 'Relaxation', cost: 3500 },
+              { title: 'Surfing Lessons at Echo Beach', time: '09:00 AM', category: 'Adventure', cost: 2800 },
+              { title: 'Uluwatu Cliffside Temple & Kecak Dance', time: '04:00 PM', category: 'Heritage', cost: 1800 }
+            ]
+          },
+          {
+            city: 'Ubud Rice Terraces & Waterfalls',
+            duration: '4 Days',
+            dateRange: '18 Dec – 22 Dec',
+            budget: 43000,
+            activities: [
+              { title: 'Tegallalang Rice Terrace & Giant Swing', time: '08:30 AM', category: 'Sightseeing', cost: 2200 },
+              { title: 'Tegenungan Waterfall Forest Trek', time: '11:30 AM', category: 'Adventure', cost: 1200 },
+              { title: 'Sacred Monkey Forest Sanctuary Walk', time: '02:30 PM', category: 'Heritage', cost: 1500 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'trip-swiss',
+        name: 'Swiss Alps Winter Wonder',
+        destination: 'Zermatt & Interlaken, Switzerland',
+        status: 'ongoing',
+        dates: 'Dec 18 – Dec 26, 2026',
+        budget: 145000,
+        imageUrl: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&h=500&fit=crop',
+        description: 'Skiing and snowboarding around Matterhorn peaks accompanied by scenic glacier railway excursions and cheese fondue.',
+        stops: [
+          {
+            city: 'Zermatt (Matterhorn Alpine Village)',
+            duration: '4 Days',
+            dateRange: '18 Dec – 21 Dec',
+            budget: 80000,
+            activities: [
+              { title: 'Gornergrat Scenic Cogwheel Railway', time: '09:00 AM', category: 'Sightseeing', cost: 9500 },
+              { title: 'Glacier Paradise High-Altitude Skiing', time: '01:00 PM', category: 'Adventure', cost: 12000 },
+              { title: 'Traditional Alpine Fondue Tasting', time: '07:30 PM', category: 'Food & Culture', cost: 4500 }
+            ]
+          },
+          {
+            city: 'Interlaken & Jungfrau Region',
+            duration: '4 Days',
+            dateRange: '22 Dec – 26 Dec',
+            budget: 65000,
+            activities: [
+              { title: 'Jungfraujoch Top of Europe Express', time: '08:00 AM', category: 'Sightseeing', cost: 16000 },
+              { title: 'Lake Brienz Steamboat Cruise', time: '02:00 PM', category: 'Relaxation', cost: 3200 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'trip-tokyo',
+        name: 'Tokyo & Kyoto Cherry Blossom Odyssey',
+        destination: 'Tokyo & Kyoto, Japan',
+        status: 'upcoming',
+        dates: 'Mar 24 – Apr 04, 2027',
+        budget: 185000,
+        imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&h=500&fit=crop',
+        description: 'Immersive cultural tour spanning Shinjuku nightlife, historic Kyoto tea ceremonies, and Arashiyama bamboo grove.',
+        stops: [
+          {
+            city: 'Tokyo Metropolis (Shinjuku & Shibuya)',
+            duration: '5 Days',
+            dateRange: '24 Mar – 28 Mar',
+            budget: 95000,
+            activities: [
+              { title: 'Shinjuku Gyoen Cherry Blossom Picnic', time: '10:00 AM', category: 'Sightseeing', cost: 800 },
+              { title: 'TeamLab Planets Borderless Digital Art', time: '02:00 PM', category: 'Sightseeing', cost: 3500 },
+              { title: 'Shibuya Crossing & Omoide Yokocho Food Tour', time: '06:30 PM', category: 'Food & Culture', cost: 4800 }
+            ]
+          },
+          {
+            city: 'Kyoto Ancient Shrines & Bamboo Forests',
+            duration: '6 Days',
+            dateRange: '29 Mar – 04 Apr',
+            budget: 90000,
+            activities: [
+              { title: 'Fushimi Inari 10,000 Torii Gates Hike', time: '07:30 AM', category: 'Heritage', cost: 0 },
+              { title: 'Arashiyama Bamboo Forest & Sagano Romantic Train', time: '11:00 AM', category: 'Sightseeing', cost: 2200 },
+              { title: 'Traditional Matcha Tea Ceremony in Gion', time: '04:00 PM', category: 'Food & Culture', cost: 3800 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'trip-rajasthan',
+        name: 'Rajasthan Royal Palace Heritage Circuit',
+        destination: 'Jaipur & Udaipur, Rajasthan, India',
+        status: 'completed',
+        dates: 'Oct 15 – Oct 22, 2026',
+        budget: 35000,
+        imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&h=500&fit=crop',
+        description: 'Spectacular royal palace heritage circuits, Amber Fort elephant corridors, and private sunset boat rides on Lake Pichola.',
+        stops: [
+          {
+            city: 'Jaipur (The Pink City)',
+            duration: '3 Days',
+            dateRange: '15 Oct – 17 Oct',
+            budget: 18500,
+            activities: [
+              { title: 'Amber Fort Guided Heritage Tour', time: '09:30 AM', category: 'Heritage', cost: 1200 },
+              { title: 'Hawa Mahal & City Palace Walk', time: '02:30 PM', category: 'Sightseeing', cost: 800 },
+              { title: 'Chokhi Dhani Traditional Rajasthani Dinner', time: '07:00 PM', category: 'Food & Culture', cost: 1800 }
+            ]
+          },
+          {
+            city: 'Udaipur (City of Lakes)',
+            duration: '4 Days',
+            dateRange: '18 Oct – 22 Oct',
+            budget: 16500,
+            activities: [
+              { title: 'Lake Pichola Sunset Boat Cruise', time: '05:00 PM', category: 'Relaxation', cost: 1000 },
+              { title: 'Sajjangarh Monsoon Palace Sunset View', time: '11:00 AM', category: 'Sightseeing', cost: 850 }
+            ]
+          }
+        ]
+      }
+    ];
+
+    function getTrips() {
+      try {
+        const stored = localStorage.getItem('gt_user_trips');
+        return stored ? JSON.parse(stored) : DEFAULT_USER_TRIPS;
+      } catch {
+        return DEFAULT_USER_TRIPS;
+      }
+    }
+
+    function renderItinerary() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tripId = urlParams.get('tripId') || 'trip-bali';
+
+      const trips = getTrips();
+      let trip = trips.find(t => t.id === tripId);
+      if (!trip) {
+        trip = trips[0] || DEFAULT_USER_TRIPS[0];
+      }
+
+      // Populate Header Banner
+      document.getElementById('itinTripTitle').textContent = trip.name;
+      document.getElementById('itinDestination').textContent = trip.destination;
+      document.getElementById('itinDates').textContent = trip.dates || 'Upcoming Journey';
+      document.getElementById('itinStatusBadge').textContent = trip.status.toUpperCase();
+
+      if (trip.imageUrl) {
+        document.getElementById('itinHeroBanner').style.background = `linear-gradient(135deg, rgba(26, 86, 219, 0.88), rgba(15, 23, 42, 0.82)), url('${trip.imageUrl}') center/cover no-repeat`;
+      }
+
+      // Populate Stats
+      const totalBudget = trip.budget || (trip.stops || []).reduce((s, st) => s + (st.budget || 0), 0);
+      document.getElementById('statTotalBudget').textContent = `₹${Number(totalBudget).toLocaleString('en-IN')}`;
+      document.getElementById('statStopCount').textContent = `${(trip.stops || []).length} Stops Planned`;
+      document.getElementById('statPerPerson').textContent = `₹${Math.round(totalBudget / 2).toLocaleString('en-IN')}`;
+      document.getElementById('statStatus').textContent = trip.status.charAt(0).toUpperCase() + trip.status.slice(1);
+
+      // Render Stops & Day-by-Day Activities
+      const stopsContainer = document.getElementById('itinStopsContainer');
+      const stops = trip.stops || [];
+
+      if (stops.length === 0) {
+        stopsContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: var(--clr-white); border-radius: 12px; border: 1px dashed var(--clr-border);">
+            <p style="color: var(--clr-text-muted);">No stops planned for this itinerary yet. Click "Edit in Builder" to add destinations and excursions.</p>
+          </div>
+        `;
+        return;
+      }
+
+      stopsContainer.innerHTML = stops.map((stop, idx) => {
+        const activities = stop.activities || [];
+        const activitiesHtml = activities.length > 0 ? activities.map(act => `
+          <div class="activity-row">
+            <div>
+              <strong style="color: var(--clr-text); font-size: 0.95rem;">${act.title}</strong>
+              <div style="font-size: 0.82rem; color: var(--clr-text-muted); margin-top: 3px;">
+                <i class="fas fa-clock"></i> ${act.time || 'Flexible'} &bull; <span class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-size: 0.72rem; padding: 2px 6px;">${act.category || 'Sightseeing'}</span>
+              </div>
+            </div>
+            <div style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">
+              ${act.cost > 0 ? '₹' + Number(act.cost).toLocaleString('en-IN') : '<span style="color: var(--clr-success);">Free</span>'}
+            </div>
+          </div>
+        `).join('') : '<div style="padding: 16px 20px; color: var(--clr-text-muted); font-size: 0.88rem;">No activities configured for this stop.</div>';
+
+        return `
+          <div class="stop-card">
+            <div class="stop-header">
+              <div>
+                <strong style="font-size: 1.1rem; color: var(--clr-text);">Stop ${idx + 1}: ${stop.city}</strong>
+                <div style="font-size: 0.82rem; color: var(--clr-text-muted); margin-top: 2px;">
+                  <i class="fas fa-calendar-alt"></i> ${stop.dateRange || ''} &bull; ${stop.duration || ''}
+                </div>
+              </div>
+              <div>
+                <span class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-size: 0.85rem; padding: 6px 12px; font-weight: 700;">
+                  Stop Budget: ₹${Number(stop.budget || 0).toLocaleString('en-IN')}
+                </span>
+              </div>
+            </div>
+            <div>
+              ${activitiesHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderItinerary);
+  </script>
 </body>
 </html>

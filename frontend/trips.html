@@ -12,54 +12,42 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* ---- Trips Page: Vertical Tabs + Card Grid ---- */
     .trips-layout {
       display: grid;
       grid-template-columns: 220px 1fr;
-      gap: 0;
       min-height: calc(100vh - 120px);
     }
-
-    /* Vertical Tab Sidebar */
     .trips-tabs {
       background: var(--clr-white);
       border-right: 1px solid var(--clr-border);
       padding: 24px 0;
       display: flex;
       flex-direction: column;
-      gap: 4px;
     }
     .trips-tabs__tab {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       padding: 14px 24px;
+      border: none;
+      background: transparent;
+      color: var(--clr-text-muted);
       font-size: .95rem;
       font-weight: 600;
-      color: var(--clr-text-muted);
       cursor: pointer;
-      border: none;
-      background: none;
       text-align: left;
       border-left: 3px solid transparent;
-      transition: all .25s ease;
+      transition: all var(--transition);
     }
     .trips-tabs__tab:hover {
+      color: var(--clr-primary);
       background: var(--clr-bg);
-      color: var(--clr-text);
     }
     .trips-tabs__tab.active {
       color: var(--clr-primary);
       background: var(--clr-primary-light);
       border-left-color: var(--clr-primary);
     }
-    .trips-tabs__tab i {
-      width: 18px;
-      text-align: center;
-      font-size: .9rem;
-    }
-
-    /* Tab Content Panels */
     .trips-panel {
       display: none;
       padding: 28px 32px;
@@ -68,14 +56,6 @@
     .trips-panel.active {
       display: block;
     }
-    .trips-panel__title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--clr-text);
-      margin-bottom: 20px;
-    }
-
-    /* Vertical Trip Cards — Portrait Style */
     .trips-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -89,16 +69,15 @@
       display: flex;
       flex-direction: column;
       transition: box-shadow .3s ease, transform .3s ease;
-      /* NO default shadow */
-      box-shadow: none;
+      box-shadow: var(--shadow-sm);
     }
     .vtrip-card:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,.12);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,.1);
       transform: translateY(-4px);
     }
     .vtrip-card__img {
       width: 100%;
-      height: 200px;
+      height: 180px;
       object-fit: cover;
       display: block;
     }
@@ -108,9 +87,8 @@
       display: flex;
       flex-direction: column;
     }
-
     .vtrip-card__name {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--clr-text);
       margin-bottom: 8px;
@@ -120,18 +98,13 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: .82rem;
+      font-size: .85rem;
       color: var(--clr-text-muted);
       margin-bottom: 6px;
     }
-    .vtrip-card__meta i {
-      color: var(--clr-primary);
-      width: 14px;
-      text-align: center;
-    }
     .vtrip-card__desc {
       font-size: .85rem;
-      color: #666;
+      color: var(--clr-text-muted);
       line-height: 1.5;
       margin: 8px 0 16px;
       flex: 1;
@@ -140,28 +113,11 @@
       margin-top: auto;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
-      .trips-layout {
-        grid-template-columns: 1fr;
-      }
-      .trips-tabs {
-        flex-direction: row;
-        overflow-x: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--clr-border);
-        padding: 0;
-      }
-      .trips-tabs__tab {
-        border-left: none;
-        border-bottom: 3px solid transparent;
-        padding: 14px 18px;
-        white-space: nowrap;
-      }
-      .trips-tabs__tab.active {
-        border-left-color: transparent;
-        border-bottom-color: var(--clr-primary);
-      }
+      .trips-layout { grid-template-columns: 1fr; }
+      .trips-tabs { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--clr-border); padding: 0; }
+      .trips-tabs__tab { border-left: none; border-bottom: 3px solid transparent; padding: 14px 18px; white-space: nowrap; }
+      .trips-tabs__tab.active { border-left-color: transparent; border-bottom-color: var(--clr-primary); }
       .trips-panel { padding: 20px 16px; }
       .trips-grid { grid-template-columns: 1fr; }
     }
@@ -171,7 +127,7 @@
 
   <!-- Header Component -->
   <header class="header">
-    <a href="index.html" class="header__logo">GlobalTrotter</a>
+    <a href="index.html" class="header__logo">GlobeTrotter</a>
     <button class="header__hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -187,17 +143,16 @@
     <div class="header__profile" title="Profile"><i class="fas fa-user"></i></div>
   </header>
 
-  <!-- Toolbar / Search / Filter Bar -->
+  <!-- Toolbar / Action Bar -->
   <div class="toolbar">
     <div class="toolbar__search">
       <i class="fas fa-search search-icon"></i>
-      <input type="text" placeholder="Search your trips by name, destination, or keyword..." aria-label="Search trips">
+      <input type="text" id="tripSearchInput" placeholder="Search your trips by name, destination, or keyword..." oninput="handleFilterTrips()">
     </div>
     <div class="toolbar__actions">
-      <button type="button" class="btn btn--outline" data-dropdown="group"><i class="fas fa-layer-group"></i> Group By</button>
-      <button type="button" class="btn btn--outline" data-dropdown="filter"><i class="fas fa-filter"></i> Filter</button>
-      <button type="button" class="btn btn--outline" data-dropdown="sort"><i class="fas fa-sort"></i> Sort By</button>
-      <a href="create-trip.html" class="btn btn--primary">+ New Trip</a>
+      <a href="create-trip.html" class="btn btn--primary" style="font-weight: 700;">
+        <i class="fas fa-plus"></i> + New Trip
+      </a>
     </div>
   </div>
 
@@ -206,17 +161,14 @@
 
     <!-- Left: Vertical Tabs -->
     <aside class="trips-tabs" role="tablist">
-      <button class="trips-tabs__tab active" data-panel="panel-ongoing" role="tab">
-        <i class="fas fa-suitcase-rolling"></i>
-        Ongoing
+      <button class="trips-tabs__tab active" data-panel="panel-ongoing" onclick="switchTripTab('ongoing', this)">
+        <i class="fas fa-suitcase-rolling"></i> Ongoing (<span id="countOngoing">0</span>)
       </button>
-      <button class="trips-tabs__tab" data-panel="panel-upcoming" role="tab">
-        <i class="fas fa-clock"></i>
-        Upcoming
+      <button class="trips-tabs__tab" data-panel="panel-upcoming" onclick="switchTripTab('upcoming', this)">
+        <i class="fas fa-clock"></i> Upcoming (<span id="countUpcoming">0</span>)
       </button>
-      <button class="trips-tabs__tab" data-panel="panel-completed" role="tab">
-        <i class="fas fa-check-circle"></i>
-        Completed
+      <button class="trips-tabs__tab" data-panel="panel-completed" onclick="switchTripTab('completed', this)">
+        <i class="fas fa-check-circle"></i> Completed (<span id="countCompleted">0</span>)
       </button>
     </aside>
 
@@ -224,105 +176,27 @@
     <div class="trips-content">
 
       <!-- Ongoing Panel -->
-      <section id="panel-ongoing" class="trips-panel active" role="tabpanel">
-        <h2 class="trips-panel__title">Ongoing Trips</h2>
-        <div class="trips-grid">
-
-          <article class="vtrip-card">
-            <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=300&fit=crop" alt="Bali Beach" class="vtrip-card__img">
-            <div class="vtrip-card__body">
-              <h3 class="vtrip-card__name">Bali Beach Getaway</h3>
-              <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> Bali, Indonesia</div>
-              <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> Dec 15 – Dec 22, 2024</div>
-              <p class="vtrip-card__desc">Tropical relaxation exploring Ubud temples, Nusa Penida coastal cliffs, and beachfront dining in Seminyak.</p>
-              <div class="vtrip-card__action">
-                <a href="itinerary.html" class="btn btn--primary btn--sm btn--block">View Itinerary</a>
-              </div>
-            </div>
-          </article>
-
-          <article class="vtrip-card">
-            <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=300&fit=crop" alt="Swiss Alps" class="vtrip-card__img">
-            <div class="vtrip-card__body">
-              <h3 class="vtrip-card__name">Swiss Alps Winter Wonder</h3>
-              <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> Zermatt &amp; Interlaken, Switzerland</div>
-              <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> Dec 18 – Dec 26, 2024</div>
-              <p class="vtrip-card__desc">Skiing and snowboarding around Matterhorn peaks accompanied by scenic glacier railway excursions.</p>
-              <div class="vtrip-card__action">
-                <a href="itinerary.html" class="btn btn--primary btn--sm btn--block">View Itinerary</a>
-              </div>
-            </div>
-          </article>
-
+      <section id="panel-ongoing" class="trips-panel active">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="trips-panel__title" style="margin: 0;">Ongoing Trips</h2>
         </div>
+        <div id="gridOngoing" class="trips-grid"></div>
       </section>
 
       <!-- Upcoming Panel -->
-      <section id="panel-upcoming" class="trips-panel" role="tabpanel">
-        <h2 class="trips-panel__title">Upcoming Trips</h2>
-        <div class="trips-grid">
-
-          <article class="vtrip-card">
-            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop" alt="Tokyo" class="vtrip-card__img">
-            <div class="vtrip-card__body">
-              <h3 class="vtrip-card__name">Tokyo &amp; Kyoto Cherry Blossom Odyssey</h3>
-              <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> Tokyo &amp; Kyoto, Japan</div>
-              <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> Mar 24 – Apr 04, 2025</div>
-              <p class="vtrip-card__desc">Immersive cultural tour spanning Shinjuku nightlife, historic Kyoto tea ceremonies, and Arashiyama bamboo grove.</p>
-              <div class="vtrip-card__action">
-                <a href="itinerary.html" class="btn btn--primary btn--sm btn--block">View Itinerary</a>
-              </div>
-            </div>
-          </article>
-
-          <article class="vtrip-card">
-            <img src="https://images.unsplash.com/photo-1534113414509-0eec2bfb493f?w=400&h=300&fit=crop" alt="Amalfi Coast" class="vtrip-card__img">
-            <div class="vtrip-card__body">
-              <h3 class="vtrip-card__name">Amalfi Coast Road Trip</h3>
-              <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> Positano &amp; Amalfi, Italy</div>
-              <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> May 10 – May 18, 2025</div>
-              <p class="vtrip-card__desc">Panoramic coastal drives, Mediterranean seafood tasting, Capri boat excursions, and hillside lemon orchard walks.</p>
-              <div class="vtrip-card__action">
-                <a href="itinerary.html" class="btn btn--primary btn--sm btn--block">View Itinerary</a>
-              </div>
-            </div>
-          </article>
-
+      <section id="panel-upcoming" class="trips-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="trips-panel__title" style="margin: 0;">Upcoming Trips</h2>
         </div>
+        <div id="gridUpcoming" class="trips-grid"></div>
       </section>
 
       <!-- Completed Panel -->
-      <section id="panel-completed" class="trips-panel" role="tabpanel">
-        <h2 class="trips-panel__title">Completed Trips</h2>
-        <div class="trips-grid">
-
-          <article class="vtrip-card">
-            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=300&fit=crop" alt="Paris" class="vtrip-card__img">
-            <div class="vtrip-card__body">
-              <h3 class="vtrip-card__name">Parisian Autumn Art &amp; Architecture Tour</h3>
-              <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> Paris, France</div>
-              <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> Oct 05 – Oct 12, 2024</div>
-              <p class="vtrip-card__desc">Curated museum visits to the Louvre and Musée d'Orsay, Montmartre historic walking tours, and Seine sunset dinner cruise.</p>
-              <div class="vtrip-card__action">
-                <a href="itinerary.html" class="btn btn--outline btn--sm btn--block">View Summary</a>
-              </div>
-            </div>
-          </article>
-
-          <article class="vtrip-card">
-            <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop" alt="New York" class="vtrip-card__img">
-            <div class="vtrip-card__body">
-              <h3 class="vtrip-card__name">New York City Autumn Escape</h3>
-              <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> New York City, USA</div>
-              <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> Sep 14 – Sep 20, 2024</div>
-              <p class="vtrip-card__desc">Broadway musicals, Central Park foliage walks, Chelsea Market food tour, and Summit One Vanderbilt skyline views.</p>
-              <div class="vtrip-card__action">
-                <a href="itinerary.html" class="btn btn--outline btn--sm btn--block">View Summary</a>
-              </div>
-            </div>
-          </article>
-
+      <section id="panel-completed" class="trips-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="trips-panel__title" style="margin: 0;">Completed Trips</h2>
         </div>
+        <div id="gridCompleted" class="trips-grid"></div>
       </section>
 
     </div>
@@ -330,17 +204,218 @@
 
   <script src="js/main.js"></script>
   <script>
-    // Vertical Tab Switching for Trips Page
-    document.querySelectorAll('.trips-tabs__tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        // Deactivate all tabs
-        document.querySelectorAll('.trips-tabs__tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.trips-panel').forEach(p => p.classList.remove('active'));
-        // Activate clicked tab
-        tab.classList.add('active');
-        const panel = document.getElementById(tab.dataset.panel);
-        if (panel) panel.classList.add('active');
-      });
+    const DEFAULT_USER_TRIPS = [
+      {
+        id: 'trip-bali',
+        name: 'Bali Beach & Temple Getaway',
+        destination: 'Bali, Indonesia',
+        status: 'ongoing',
+        dates: 'Dec 15 – Dec 22, 2026',
+        budget: 75000,
+        imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&h=500&fit=crop',
+        description: 'Tropical relaxation exploring Ubud rice terraces, Nusa Penida coastal cliffs, and beachfront dining in Seminyak.',
+        stops: [
+          {
+            city: 'Seminyak & Kuta Coast',
+            duration: '3 Days',
+            dateRange: '15 Dec – 17 Dec',
+            budget: 32000,
+            activities: [
+              { title: 'Beachfront Sunset Lounge & Cocktails', time: '05:30 PM', category: 'Relaxation', cost: 3500 },
+              { title: 'Surfing Lessons at Echo Beach', time: '09:00 AM', category: 'Adventure', cost: 2800 },
+              { title: 'Uluwatu Cliffside Temple & Kecak Dance', time: '04:00 PM', category: 'Heritage', cost: 1800 }
+            ]
+          },
+          {
+            city: 'Ubud Rice Terraces & Waterfalls',
+            duration: '4 Days',
+            dateRange: '18 Dec – 22 Dec',
+            budget: 43000,
+            activities: [
+              { title: 'Tegallalang Rice Terrace & Giant Swing', time: '08:30 AM', category: 'Sightseeing', cost: 2200 },
+              { title: 'Tegenungan Waterfall Forest Trek', time: '11:30 AM', category: 'Adventure', cost: 1200 },
+              { title: 'Sacred Monkey Forest Sanctuary Walk', time: '02:30 PM', category: 'Heritage', cost: 1500 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'trip-swiss',
+        name: 'Swiss Alps Winter Wonder',
+        destination: 'Zermatt & Interlaken, Switzerland',
+        status: 'ongoing',
+        dates: 'Dec 18 – Dec 26, 2026',
+        budget: 145000,
+        imageUrl: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&h=500&fit=crop',
+        description: 'Skiing and snowboarding around Matterhorn peaks accompanied by scenic glacier railway excursions and cheese fondue.',
+        stops: [
+          {
+            city: 'Zermatt (Matterhorn Alpine Village)',
+            duration: '4 Days',
+            dateRange: '18 Dec – 21 Dec',
+            budget: 80000,
+            activities: [
+              { title: 'Gornergrat Scenic Cogwheel Railway', time: '09:00 AM', category: 'Sightseeing', cost: 9500 },
+              { title: 'Glacier Paradise High-Altitude Skiing', time: '01:00 PM', category: 'Adventure', cost: 12000 },
+              { title: 'Traditional Alpine Fondue Tasting', time: '07:30 PM', category: 'Food & Culture', cost: 4500 }
+            ]
+          },
+          {
+            city: 'Interlaken & Jungfrau Region',
+            duration: '4 Days',
+            dateRange: '22 Dec – 26 Dec',
+            budget: 65000,
+            activities: [
+              { title: 'Jungfraujoch Top of Europe Express', time: '08:00 AM', category: 'Sightseeing', cost: 16000 },
+              { title: 'Lake Brienz Steamboat Cruise', time: '02:00 PM', category: 'Relaxation', cost: 3200 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'trip-tokyo',
+        name: 'Tokyo & Kyoto Cherry Blossom Odyssey',
+        destination: 'Tokyo & Kyoto, Japan',
+        status: 'upcoming',
+        dates: 'Mar 24 – Apr 04, 2027',
+        budget: 185000,
+        imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&h=500&fit=crop',
+        description: 'Immersive cultural tour spanning Shinjuku nightlife, historic Kyoto tea ceremonies, and Arashiyama bamboo grove.',
+        stops: [
+          {
+            city: 'Tokyo Metropolis (Shinjuku & Shibuya)',
+            duration: '5 Days',
+            dateRange: '24 Mar – 28 Mar',
+            budget: 95000,
+            activities: [
+              { title: 'Shinjuku Gyoen Cherry Blossom Picnic', time: '10:00 AM', category: 'Sightseeing', cost: 800 },
+              { title: 'TeamLab Planets Borderless Digital Art', time: '02:00 PM', category: 'Sightseeing', cost: 3500 },
+              { title: 'Shibuya Crossing & Omoide Yokocho Food Tour', time: '06:30 PM', category: 'Food & Culture', cost: 4800 }
+            ]
+          },
+          {
+            city: 'Kyoto Ancient Shrines & Bamboo Forests',
+            duration: '6 Days',
+            dateRange: '29 Mar – 04 Apr',
+            budget: 90000,
+            activities: [
+              { title: 'Fushimi Inari 10,000 Torii Gates Hike', time: '07:30 AM', category: 'Heritage', cost: 0 },
+              { title: 'Arashiyama Bamboo Forest & Sagano Romantic Train', time: '11:00 AM', category: 'Sightseeing', cost: 2200 },
+              { title: 'Traditional Matcha Tea Ceremony in Gion', time: '04:00 PM', category: 'Food & Culture', cost: 3800 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'trip-rajasthan',
+        name: 'Rajasthan Royal Palace Heritage Circuit',
+        destination: 'Jaipur & Udaipur, Rajasthan, India',
+        status: 'completed',
+        dates: 'Oct 15 – Oct 22, 2026',
+        budget: 35000,
+        imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&h=500&fit=crop',
+        description: 'Spectacular royal palace heritage circuits, Amber Fort elephant corridors, and private sunset boat rides on Lake Pichola.',
+        stops: [
+          {
+            city: 'Jaipur (The Pink City)',
+            duration: '3 Days',
+            dateRange: '15 Oct – 17 Oct',
+            budget: 18500,
+            activities: [
+              { title: 'Amber Fort Guided Heritage Tour', time: '09:30 AM', category: 'Heritage', cost: 1200 },
+              { title: 'Hawa Mahal & City Palace Walk', time: '02:30 PM', category: 'Sightseeing', cost: 800 },
+              { title: 'Chokhi Dhani Traditional Rajasthani Dinner', time: '07:00 PM', category: 'Food & Culture', cost: 1800 }
+            ]
+          },
+          {
+            city: 'Udaipur (City of Lakes)',
+            duration: '4 Days',
+            dateRange: '18 Oct – 22 Oct',
+            budget: 16500,
+            activities: [
+              { title: 'Lake Pichola Sunset Boat Cruise', time: '05:00 PM', category: 'Relaxation', cost: 1000 },
+              { title: 'Sajjangarh Monsoon Palace Sunset View', time: '11:00 AM', category: 'Sightseeing', cost: 850 }
+            ]
+          }
+        ]
+      }
+    ];
+
+    function getUserTrips() {
+      try {
+        const stored = localStorage.getItem('gt_user_trips');
+        return stored ? JSON.parse(stored) : DEFAULT_USER_TRIPS;
+      } catch {
+        return DEFAULT_USER_TRIPS;
+      }
+    }
+
+    function saveUserTrips(trips) {
+      localStorage.setItem('gt_user_trips', JSON.stringify(trips));
+    }
+
+    function renderTrips(filterText = '') {
+      const trips = getUserTrips();
+      const query = filterText.toLowerCase().trim();
+
+      const ongoing = trips.filter(t => t.status === 'ongoing' && (!query || t.name.toLowerCase().includes(query) || t.destination.toLowerCase().includes(query)));
+      const upcoming = trips.filter(t => t.status === 'upcoming' && (!query || t.name.toLowerCase().includes(query) || t.destination.toLowerCase().includes(query)));
+      const completed = trips.filter(t => t.status === 'completed' && (!query || t.name.toLowerCase().includes(query) || t.destination.toLowerCase().includes(query)));
+
+      document.getElementById('countOngoing').textContent = ongoing.length;
+      document.getElementById('countUpcoming').textContent = upcoming.length;
+      document.getElementById('countCompleted').textContent = completed.length;
+
+      document.getElementById('gridOngoing').innerHTML = renderCardList(ongoing);
+      document.getElementById('gridUpcoming').innerHTML = renderCardList(upcoming);
+      document.getElementById('gridCompleted').innerHTML = renderCardList(completed);
+    }
+
+    function renderCardList(list) {
+      if (list.length === 0) {
+        return `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: var(--clr-white); border-radius: 12px; border: 1px dashed var(--clr-border); color: var(--clr-text-muted);">
+            <i class="fas fa-plane" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+            <p style="margin: 0; font-weight: 600;">No trips found in this category.</p>
+          </div>
+        `;
+      }
+
+      return list.map(trip => `
+        <article class="vtrip-card">
+          <img src="${trip.imageUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=400&q=80'}" alt="${trip.name}" class="vtrip-card__img">
+          <div class="vtrip-card__body">
+            <h3 class="vtrip-card__name">${trip.name}</h3>
+            <div class="vtrip-card__meta"><i class="fas fa-map-marker-alt"></i> ${trip.destination}</div>
+            <div class="vtrip-card__meta"><i class="fas fa-calendar-alt"></i> ${trip.dates || 'Upcoming'} &bull; ₹${Number(trip.budget || 0).toLocaleString('en-IN')}</div>
+            <p class="vtrip-card__desc">${trip.description || 'Custom multi-city constructed itinerary.'}</p>
+            <div class="vtrip-card__action">
+              <a href="itinerary.html?tripId=${trip.id}" class="btn btn--primary btn--sm btn--block" style="font-weight: 700; color: #ffffff !important;">
+                <i class="fas fa-route"></i> View Itinerary
+              </a>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function switchTripTab(status, btn) {
+      document.querySelectorAll('.trips-tabs__tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.trips-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`panel-${status}`).classList.add('active');
+    }
+
+    function handleFilterTrips() {
+      const query = document.getElementById('tripSearchInput').value;
+      renderTrips(query);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!localStorage.getItem('gt_user_trips')) {
+        saveUserTrips(DEFAULT_USER_TRIPS);
+      }
+      renderTrips();
     });
   </script>
 </body>

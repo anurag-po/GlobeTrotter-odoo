@@ -934,11 +934,29 @@
     });
 
     document.getElementById('btn-save-itinerary').addEventListener('click', () => {
+      const totalBudget = calculateTotalCost();
+      const newTripId = 'trip-' + Date.now();
+      const newTrip = {
+        id: newTripId,
+        name: builderData.title || 'Custom Constructed Itinerary',
+        destination: builderData.destination || 'Multi-City Tour',
+        status: 'upcoming',
+        dates: 'Upcoming',
+        budget: totalBudget,
+        imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&h=500&fit=crop',
+        description: `Custom built multi-stop itinerary with ${builderData.stops.length} cities.`,
+        stops: builderData.stops
+      };
+
+      const userTrips = JSON.parse(localStorage.getItem('gt_user_trips') || '[]');
+      userTrips.unshift(newTrip);
+      localStorage.setItem('gt_user_trips', JSON.stringify(userTrips));
       localStorage.setItem('gt_saved_itinerary', JSON.stringify(builderData));
-      if (window.UIService) window.UIService.showToast('Itinerary saved to My Trips!', 'success');
+
+      if (window.UIService) window.UIService.showToast('🎉 Itinerary saved to My Trips!', 'success');
       setTimeout(() => {
-        window.location.href = 'trips.html';
-      }, 500);
+        window.location.href = `itinerary.html?tripId=${newTripId}`;
+      }, 400);
     });
 
     // Close modal on backdrop click

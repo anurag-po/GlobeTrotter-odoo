@@ -193,9 +193,15 @@ button, input, select, textarea {
 }
 .btn--primary {
   background: var(--clr-primary);
-  color: var(--clr-white);
+  color: #ffffff !important;
+  text-decoration: none;
 }
-.btn--primary:hover { background: var(--clr-primary-dark); }
+.btn--primary:hover, .btn--primary:focus { 
+  background: #1d4ed8; 
+  color: #ffffff !important; 
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+}
 .btn--outline {
   border: 1px solid var(--clr-border);
   color: var(--clr-text);

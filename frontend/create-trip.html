@@ -893,6 +893,72 @@
         updateSelectedCounter();
       });
     });
+
+    // Form Submission & Dynamic Trip Creation
+    const tripForm = document.querySelector('.trip-form');
+    if (tripForm) {
+      tripForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('trip-title').value.trim();
+        const destination = document.getElementById('trip-destination').value.trim();
+        const startDate = document.getElementById('trip-start-date').value;
+        const endDate = document.getElementById('trip-end-date').value;
+        const budget = Number(document.getElementById('trip-budget').value) || 25000;
+
+        const selectedActivities = [];
+        document.querySelectorAll('.suggestion-card.is-selected').forEach(card => {
+          const name = card.querySelector('.suggestion-card__name')?.textContent.trim();
+          const location = card.querySelector('.suggestion-card__location span')?.textContent.trim();
+          const category = card.querySelector('.suggestion-card__category')?.textContent.trim();
+          const priceText = card.querySelector('.suggestion-card__price-value')?.textContent.replace(/[^0-9]/g, '');
+          const cost = Number(priceText) || 1200;
+
+          if (name) {
+            selectedActivities.push({
+              title: name,
+              time: '10:00 AM',
+              category: category || 'Sightseeing',
+              cost: cost
+            });
+          }
+        });
+
+        const newTripId = 'trip-' + Date.now();
+        const newTrip = {
+          id: newTripId,
+          name: title,
+          destination: destination,
+          status: 'upcoming',
+          dates: startDate && endDate ? `${startDate} to ${endDate}` : 'Upcoming',
+          budget: budget,
+          imageUrl: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80',
+          description: `Custom itinerary for ${destination} planned with GlobeTrotter.`,
+          stops: [
+            {
+              city: destination.split(',')[0].trim() || destination,
+              duration: '3 Days',
+              dateRange: startDate && endDate ? `${startDate} – ${endDate}` : 'Upcoming',
+              budget: budget,
+              activities: selectedActivities.length > 0 ? selectedActivities : [
+                { title: `${destination} City Exploration & Historic Landmarks`, time: '09:30 AM', category: 'Sightseeing', cost: Math.round(budget * 0.15) }
+              ]
+            }
+          ]
+        };
+
+        const existingTrips = JSON.parse(localStorage.getItem('gt_user_trips') || '[]');
+        existingTrips.unshift(newTrip);
+        localStorage.setItem('gt_user_trips', JSON.stringify(existingTrips));
+
+        if (window.UIService) {
+          window.UIService.showToast(`Trip "${title}" created successfully!`, 'success');
+        }
+
+        setTimeout(() => {
+          window.location.href = `itinerary.html?tripId=${newTripId}`;
+        }, 300);
+      });
+    }
   </script>
 </body>
 </html>
