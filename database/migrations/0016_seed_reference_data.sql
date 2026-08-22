@@ -54,3 +54,27 @@ VALUES
     ('a0000001-0000-0000-0000-000000000006', 'Park Güell Monumental Zone Access', 'Stroll through the iconic mosaic salamander and panoramic vistas.', 'sightseeing', 14.00, 'EUR', 90, 95),
     ('a0000001-0000-0000-0000-000000000006', 'Gothic Quarter Tapas & Wine Tour', 'Taste authentic Iberian ham, patatas bravas, and regional wines.', 'food', 65.00, 'EUR', 180, 93)
 ON CONFLICT DO NOTHING;
+
+-- 16.3 Designated Administrator Seed Account
+INSERT INTO users (
+    id, username, email, password_hash, first_name, last_name, phone_number, city, country,
+    additional_info, role, status, has_verified_email, notification_preferences
+)
+VALUES (
+    '00000000-0000-0000-0000-000000000001',
+    'admin1234',
+    'admin1234@temporaryaccount.none',
+    '$argon2id$v=19$m=65536,t=3,p=4$vU0o1Gz92bJvH7C10H2jKg$Z5i1r7HjH0FjW4Zq4lKk1jG0t3vX4bV1yU9w2kP4mQo',
+    'GlobeTrotter',
+    'Admin',
+    '+19999999999',
+    'Admin HQ',
+    'Global',
+    'Primary System Administrator for GlobeTrotter',
+    'admin',
+    'active',
+    true,
+    '{"email": true, "push": true, "inApp": true}'::jsonb
+)
+ON CONFLICT (email) DO UPDATE SET role = 'admin', status = 'active';
+

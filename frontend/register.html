@@ -441,6 +441,7 @@
     </div>
   </main>
 
+  <script src="js/main.js"></script>
   <script>
     // Live Avatar Preview Handling
     const avatarInput = document.getElementById('avatarInput');
@@ -465,15 +466,36 @@
     const submitBtn = document.getElementById('submitBtn');
 
     if (form) {
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         if (submitBtn) {
           submitBtn.disabled = true;
-          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
         }
 
-        setTimeout(() => {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const country = document.getElementById('country').value.trim();
+        const bio = document.getElementById('bio').value.trim();
+
+        try {
+          const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+          await GlobeTrotterAuth.register({
+            username,
+            email,
+            password: 'TravelPass123!',
+            firstName,
+            lastName,
+            phoneNumber: phone,
+            city,
+            country,
+            additionalInfo: bio,
+          });
+
           if (successAlert) {
             successAlert.classList.add('show');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -481,8 +503,14 @@
 
           setTimeout(() => {
             window.location.href = 'index.html';
-          }, 1200);
-        }, 600);
+          }, 1000);
+        } catch (err) {
+          showToast(err.message || 'Registration failed', 'error');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Register Users</span> <i class="fas fa-arrow-right"></i>';
+          }
+        }
       });
     }
   </script>

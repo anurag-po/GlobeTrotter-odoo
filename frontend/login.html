@@ -18,10 +18,10 @@
       <p>Sign in to manage and plan your personalized travel itineraries.</p>
     </div>
 
-    <form action="index.html" method="GET">
+    <form id="standaloneLoginForm" onsubmit="handleStandaloneLogin(event)">
       <div class="form-group">
-        <label for="email" class="form-label">Email Address</label>
-        <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" value="priya.sharma@example.com" required>
+        <label for="email" class="form-label">Email Address or Username</label>
+        <input type="text" id="email" name="email" class="form-control" placeholder="name@example.com" value="admin1234@temporaryaccount.none" required>
       </div>
 
       <div class="form-group">
@@ -29,7 +29,7 @@
           <label for="password" class="form-label" style="margin-bottom: 0;">Password</label>
           <a href="#" style="font-size: 0.8rem; font-weight: 600;">Forgot Password?</a>
         </div>
-        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" value="••••••••" required>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" value="AdminPassword123!" required>
       </div>
 
       <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
@@ -37,18 +37,15 @@
         <label for="remember" style="font-size: 0.85rem; color: var(--clr-text-muted); cursor: pointer; margin-bottom: 0;">Keep me logged in on this PC</label>
       </div>
 
-      <button type="submit" class="btn btn--primary btn--block" style="padding: 12px; font-size: 1rem; margin-top: 10px;">
-        <span>Login to GlobalTrotter</span>
+      <button type="submit" id="loginBtn" class="btn btn--primary btn--block" style="padding: 12px; font-size: 1rem; margin-top: 10px;">
+        <span>Login to GlobeTrotter</span>
         <i class="fas fa-arrow-right"></i>
       </button>
     </form>
 
-    <div class="auth-divider">or continue with</div>
-
-    <button type="button" class="btn btn--outline btn--block" onclick="window.location.href='index.html'" style="padding: 12px; font-size: 0.95rem;">
-      <i class="fab fa-google" style="color: #EA4335;"></i>
-      <span>Continue with Google</span>
-    </button>
+    <div style="margin-top: 16px; padding: 12px; background: var(--clr-bg); border-radius: var(--radius); font-size: 0.8rem; color: var(--clr-text-muted);">
+      <i class="fas fa-shield-alt" style="color: var(--clr-primary);"></i> Admin: <strong>admin1234@temporaryaccount.none</strong>
+    </div>
 
     <p style="text-align: center; margin-top: 24px; font-size: 0.85rem; color: var(--clr-text-muted);">
       Don't have an account yet?
@@ -56,11 +53,34 @@
     </p>
 
     <div style="text-align: center; margin-top: 16px;">
-      <a href="search.html" style="font-size: 0.85rem; color: var(--clr-text-muted);">
-        <i class="fas fa-chevron-left"></i> Back to Explore
+      <a href="index.html" style="font-size: 0.85rem; color: var(--clr-text-muted);">
+        <i class="fas fa-chevron-left"></i> Back to Home
       </a>
     </div>
   </div>
 
+  <script src="js/main.js"></script>
+  <script>
+    async function handleStandaloneLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+
+      try {
+        const user = await GlobeTrotterAuth.login(email, password);
+        showToast(`Welcome back, ${user.firstName || user.username}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 500);
+      } catch (err) {
+        showToast(err.message || 'Login failed', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Login to GlobeTrotter</span> <i class="fas fa-arrow-right"></i>';
+      }
+    }
+  </script>
 </body>
 </html>

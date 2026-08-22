@@ -86,6 +86,29 @@ export class MemoryStore {
     for (const act of seedActivities) {
       this.activities.set(act.id, act);
     }
+
+    // Seed Designated Admin User
+    const adminUser: UserProps = {
+      id: '00000000-0000-0000-0000-000000000001',
+      username: 'admin1234',
+      email: 'admin1234@temporaryaccount.none',
+      passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$vU0o1Gz92bJvH7C10H2jKg$Z5i1r7HjH0FjW4Zq4lKk1jG0t3vX4bV1yU9w2kP4mQo', // AdminPassword123!
+      firstName: 'GlobeTrotter',
+      lastName: 'Admin',
+      phoneNumber: '+19999999999',
+      city: 'Admin HQ',
+      country: 'Global',
+      additionalInfo: 'Primary System Administrator for GlobeTrotter',
+      photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      languagePreference: 'en',
+      role: 'admin',
+      status: 'active',
+      hasVerifiedEmail: true,
+      notificationPreferences: { email: true, push: true, inApp: true },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(adminUser.id, adminUser);
   }
 }
 

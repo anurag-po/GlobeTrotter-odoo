@@ -5,34 +5,44 @@
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
-  /* Primary */
-  --clr-primary: #43637E;
-  --clr-primary-dark: #321E48;
-  --clr-primary-light: #D9FFF4;
+  /* Vibrant Travel Primary & Accents */
+  --clr-primary: #1A56DB;
+  --clr-primary-dark: #1E3A8A;
+  --clr-primary-light: #EBF5FF;
+  --clr-accent: #FF5A5F;
+  --clr-accent-hover: #E0484D;
+  --clr-accent-light: #FFF1F2;
 
   /* Neutrals */
   --clr-white: #FFFFFF;
-  --clr-bg: #F5F5F5;
-  --clr-border: #E0E0E0;
-  --clr-text: #321E48;
-  --clr-text-muted: #888888;
+  --clr-bg: #F8FAFC;
+  --clr-card-bg: #FFFFFF;
+  --clr-border: #E2E8F0;
+  --clr-text: #0F172A;
+  --clr-text-muted: #64748B;
 
-  /* Status */
-  --clr-success: #65DCD5;
-  --clr-warning: #F39C12;
-  --clr-info: #2980B9;
+  /* Status Colors */
+  --clr-success: #10B981;
+  --clr-success-light: #ECFDF5;
+  --clr-warning: #F59E0B;
+  --clr-warning-light: #FEF3C7;
+  --clr-info: #0284C7;
+  --clr-danger: #EF4444;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.1);
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --shadow-glow: 0 0 20px rgba(26, 86, 219, 0.2);
 
-  /* Radius */
-  --radius: 8px;
-  --radius-sm: 4px;
-  --radius-full: 50%;
+  /* Border Radii */
+  --radius: 12px;
+  --radius-sm: 6px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
 
-  /* Transitions */
-  --transition: .25s ease;
+  /* Micro-interactions */
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ---------- Reset ---------- */
@@ -820,6 +830,198 @@ button, input, select, textarea {
 .feature-card p {
   color: var(--clr-text-muted);
   font-size: .95rem;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Auth Gateway Modal & Tab Switcher Styles
+   ============================================================ */
+.auth-gateway-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-gateway-modal.active {
+  display: flex;
+}
+
+.auth-gateway-card {
+  background: var(--clr-white);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border: 1px solid var(--clr-border);
+  overflow: hidden;
+  animation: authModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes authModalPop {
+  0% { opacity: 0; transform: scale(0.94) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.auth-gateway-header {
+  padding: 28px 28px 16px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--clr-primary-light) 0%, var(--clr-white) 100%);
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.auth-gateway-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--clr-primary);
+  margin-bottom: 8px;
+}
+
+.auth-gateway-subtitle {
+  font-size: 0.9rem;
+  color: var(--clr-text-muted);
+}
+
+.auth-tabs-nav {
+  display: flex;
+  background: var(--clr-bg);
+  padding: 6px;
+  margin: 16px 28px 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--clr-border);
+  gap: 6px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+}
+
+.auth-tab-btn.active {
+  background: var(--clr-white);
+  color: var(--clr-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-tab-pane {
+  display: none;
+  padding: 24px 28px 28px;
+}
+
+.auth-tab-pane.active {
+  display: block;
+}
+
+.auth-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--clr-text-muted);
+  transition: all var(--transition);
+}
+
+.auth-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--clr-text);
+}
+
+/* User Account Pill in Navigation */
+.header__user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 4px 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  color: var(--clr-white);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.header__user-pill:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.header__user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1.5px solid var(--clr-white);
+}
+
+.header__role-badge {
+  background: var(--clr-accent);
+  color: var(--clr-white);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Toast Notifications */
+.gt-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gt-toast {
+  background: var(--clr-white);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--clr-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clr-text);
+  min-width: 280px;
+  max-width: 420px;
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+.gt-toast--success { border-left-color: var(--clr-success); }
+.gt-toast--error { border-left-color: var(--clr-danger); }
+.gt-toast--warning { border-left-color: var(--clr-warning); }
+
+@keyframes toastSlideIn {
+  0% { transform: translateX(100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 @media(max-width: 768px) {
   .hero-features { grid-template-columns: 1fr; margin-top: 40px; }
