@@ -29,7 +29,12 @@ export function createApp(deps: AppDependencies = {}): Express {
   const jobService = deps.jobService || new JobRegistry();
 
   // Security & standard middlewares
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  );
   app.use(
     cors({
       origin: config.CORS_ORIGIN === '*' ? true : config.CORS_ORIGIN,
@@ -40,6 +45,9 @@ export function createApp(deps: AppDependencies = {}): Express {
   app.use(express.urlencoded({ extended: true }));
   app.use(correlationIdMiddleware);
   app.use(requestLogger);
+
+  // Serve frontend static assets
+  app.use(express.static('frontend'));
 
   // Health checks
   app.use('/health', createHealthRouter());
@@ -59,3 +67,4 @@ export function createApp(deps: AppDependencies = {}): Express {
 
   return app;
 }
+
