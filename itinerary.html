@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerary for Paris, France — GlobalTrotter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Component -->
+  <header class="header">
+    <a href="index.html" class="header__logo">GlobalTrotter</a>
+    <button class="header__hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header__nav">
+      <a href="index.html">Home</a>
+      <a href="trips.html" class="active">My Trips</a>
+      <a href="search.html">Explore</a>
+      <a href="community.html">Community</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="profile.html">Profile</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+    <div class="header__profile" title="Profile"><i class="fas fa-user"></i></div>
+  </header>
+
+  <!-- Toolbar / Filter Bar -->
+  <div class="toolbar">
+    <div class="toolbar__search">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" placeholder="Search activities or expenses...">
+    </div>
+    <div class="toolbar__actions">
+      <button type="button" class="btn btn--outline" data-dropdown="filter">Filter</button>
+      <button type="button" class="btn btn--outline" data-dropdown="sort">Sort by</button>
+    </div>
+  </div>
+
+  <!-- Main Itinerary Content -->
+  <main class="page">
+    <div class="itinerary-header">
+      <h1>Itinerary for Paris, France</h1>
+    </div>
+
+    <!-- Day 1 -->
+    <section class="itinerary-day">
+      <span class="day-label">Day 1</span>
+      <table class="itinerary-table">
+        <thead>
+          <tr>
+            <th style="width: 75%;">Physical Activity</th>
+            <th style="width: 25%; text-align: right;">Expense</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Visit Eiffel Tower</td>
+            <td style="text-align: right; font-weight: 600;">€25</td>
+          </tr>
+          <tr>
+            <td>Lunch at Café de Flore</td>
+            <td style="text-align: right; font-weight: 600;">€35</td>
+          </tr>
+          <tr>
+            <td>Louvre Museum Tour</td>
+            <td style="text-align: right; font-weight: 600;">€17</td>
+          </tr>
+          <tr>
+            <td>Seine River Cruise</td>
+            <td style="text-align: right; font-weight: 600;">€15</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Day 2 -->
+    <section class="itinerary-day">
+      <span class="day-label">Day 2</span>
+      <table class="itinerary-table">
+        <thead>
+          <tr>
+            <th style="width: 75%;">Physical Activity</th>
+            <th style="width: 25%; text-align: right;">Expense</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Montmartre Walking Tour</td>
+            <td style="text-align: right; font-weight: 600;">€10</td>
+          </tr>
+          <tr>
+            <td>Sacré-Cœur Basilica</td>
+            <td style="text-align: right; font-weight: 600;">Free</td>
+          </tr>
+          <tr>
+            <td>Shopping at Champs-Élysées</td>
+            <td style="text-align: right; font-weight: 600;">€100</td>
+          </tr>
+          <tr>
+            <td>Dinner at Le Jules Verne</td>
+            <td style="text-align: right; font-weight: 600;">€150</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Day 3 -->
+    <section class="itinerary-day">
+      <span class="day-label">Day 3</span>
+      <table class="itinerary-table">
+        <thead>
+          <tr>
+            <th style="width: 75%;">Physical Activity</th>
+            <th style="width: 25%; text-align: right;">Expense</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Palace of Versailles Day Trip</td>
+            <td style="text-align: right; font-weight: 600;">€30</td>
+          </tr>
+          <tr>
+            <td>Pastry &amp; Croissant Tasting in Le Marais</td>
+            <td style="text-align: right; font-weight: 600;">€20</td>
+          </tr>
+          <tr>
+            <td>Sunset at Arc de Triomphe Rooftop</td>
+            <td style="text-align: right; font-weight: 600;">€13</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
