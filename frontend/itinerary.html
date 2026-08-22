@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trip Itinerary — GlobeTrotter</title>
+  <title>Trip Itinerary Viewer — GlobeTrotter</title>
   <script>
     if (!localStorage.getItem('gt_user')) {
       window.location.replace('login.html');
@@ -17,21 +17,21 @@
       overflow: hidden;
       margin-bottom: 28px;
       position: relative;
-      background: linear-gradient(135deg, rgba(26, 86, 219, 0.9), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      background: linear-gradient(135deg, rgba(26, 86, 219, 0.92), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
       color: #fff;
-      padding: 40px 32px;
+      padding: 36px 32px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       flex-wrap: wrap;
       gap: 20px;
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
     .itinerary-stats-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
     .itinerary-stat-card {
       background: var(--clr-white);
@@ -41,14 +41,15 @@
       box-shadow: var(--shadow-sm);
     }
     .itinerary-stat-label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
       color: var(--clr-text-muted);
       margin-bottom: 4px;
+      letter-spacing: 0.5px;
     }
     .itinerary-stat-val {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: var(--clr-text);
     }
@@ -59,10 +60,14 @@
       margin-bottom: 24px;
       overflow: hidden;
       box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s ease;
+    }
+    .stop-card:hover {
+      box-shadow: var(--shadow-md);
     }
     .stop-header {
-      background: var(--clr-bg);
-      padding: 16px 20px;
+      background: #F8FAFC;
+      padding: 18px 24px;
       border-bottom: 1px solid var(--clr-border);
       display: flex;
       justify-content: space-between;
@@ -74,11 +79,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
+      padding: 16px 24px;
       border-bottom: 1px solid var(--clr-border);
+      transition: background 0.15s ease;
+    }
+    .activity-row:hover {
+      background: #F8FAFC;
     }
     .activity-row:last-child {
       border-bottom: none;
+    }
+    .act-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -108,18 +127,21 @@
     <!-- Top Hero Banner for Selected Trip -->
     <div id="itinHeroBanner" class="itinerary-hero-banner">
       <div>
-        <span id="itinStatusBadge" class="badge" style="background: rgba(255,255,255,0.25); color: #fff; margin-bottom: 10px;">Ongoing Trip</span>
-        <h1 id="itinTripTitle" style="margin: 6px 0 10px 0; font-size: 2rem; color: #fff;">Trip Itinerary</h1>
-        <div style="font-size: 0.95rem; opacity: 0.95; display: flex; gap: 16px; flex-wrap: wrap;">
+        <span id="itinStatusBadge" class="badge" style="background: rgba(255,255,255,0.25); color: #fff; margin-bottom: 10px; font-weight: 700;">ONGOING TRIP</span>
+        <h1 id="itinTripTitle" style="margin: 6px 0 10px 0; font-size: 2.2rem; color: #fff; line-height: 1.2;">Trip Itinerary</h1>
+        <div style="font-size: 0.95rem; opacity: 0.95; display: flex; gap: 20px; flex-wrap: wrap;">
           <span><i class="fas fa-location-dot"></i> <span id="itinDestination">Destination</span></span>
           <span><i class="fas fa-calendar-alt"></i> <span id="itinDates">Date Range</span></span>
         </div>
       </div>
-      <div style="display: flex; gap: 12px;">
-        <a href="trips.html" class="btn btn--outline" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff; font-weight: 700;">
-          <i class="fas fa-arrow-left"></i> Back to Trips
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="trips.html" class="btn btn--outline" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff !important; font-weight: 700;">
+          <i class="fas fa-arrow-left"></i> All Trips
         </a>
-        <a href="build-itinerary.html" id="itinEditBuilderBtn" class="btn btn--primary" style="background: #ffffff; color: var(--clr-primary-dark) !important; font-weight: 700;">
+        <button type="button" class="btn btn--outline" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff !important; font-weight: 700;" onclick="handleShareItinerary()">
+          <i class="fas fa-share-nodes"></i> Share
+        </button>
+        <a href="build-itinerary.html" id="itinEditBuilderBtn" class="btn btn--primary" style="background: #ffffff; color: var(--clr-primary-dark) !important; font-weight: 800;">
           <i class="fas fa-sliders"></i> Edit in Builder
         </a>
       </div>
@@ -129,10 +151,10 @@
     <div class="itinerary-stats-row">
       <div class="itinerary-stat-card">
         <div class="itinerary-stat-label">Total Estimated Budget</div>
-        <div class="itinerary-stat-val" id="statTotalBudget">₹0</div>
+        <div class="itinerary-stat-val" id="statTotalBudget" style="color: var(--clr-primary);">₹0</div>
       </div>
       <div class="itinerary-stat-card">
-        <div class="itinerary-stat-label">Planned Stops</div>
+        <div class="itinerary-stat-label">Planned Stops / Cities</div>
         <div class="itinerary-stat-val" id="statStopCount">0 Cities</div>
       </div>
       <div class="itinerary-stat-card">
@@ -141,12 +163,17 @@
       </div>
       <div class="itinerary-stat-card">
         <div class="itinerary-stat-label">Itinerary Status</div>
-        <div class="itinerary-stat-val" id="statStatus" style="font-size: 1.15rem; color: var(--clr-primary);">Active</div>
+        <div class="itinerary-stat-val" id="statStatus" style="font-size: 1.15rem; color: #16A34A;">Active</div>
       </div>
     </div>
 
     <!-- Stops & Schedule Section -->
-    <h2 class="section-title"><i class="fas fa-route"></i> Day-by-Day Journey &amp; Stops</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+      <h2 class="section-title" style="margin: 0;"><i class="fas fa-route" style="color: var(--clr-primary);"></i> Day-by-Day Journey &amp; Activities</h2>
+      <button type="button" class="btn btn--outline btn--sm" onclick="window.print()">
+        <i class="fas fa-print"></i> Print Itinerary
+      </button>
+    </div>
 
     <div id="itinStopsContainer">
       <!-- Injected by JavaScript -->
@@ -293,6 +320,15 @@
       }
     ];
 
+    function getCategoryMeta(cat) {
+      const c = (cat || '').toLowerCase();
+      if (c.includes('sight')) return { icon: 'fa-mountain-sun', bg: '#EFF6FF', color: '#1D4ED8' };
+      if (c.includes('food') || c.includes('dine') || c.includes('cult')) return { icon: 'fa-utensils', bg: '#FEF3C7', color: '#B45309' };
+      if (c.includes('adven') || c.includes('trek')) return { icon: 'fa-person-hiking', bg: '#DCFCE7', color: '#15803D' };
+      if (c.includes('relax') || c.includes('beach')) return { icon: 'fa-umbrella-beach', bg: '#F3E8FF', color: '#7E22CE' };
+      return { icon: 'fa-monument', bg: '#FEE2E2', color: '#B91C1C' };
+    }
+
     function getTrips() {
       try {
         const stored = localStorage.getItem('gt_user_trips');
@@ -302,9 +338,19 @@
       }
     }
 
+    function handleShareItinerary() {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href);
+        if (window.UIService) window.UIService.showToast('📋 Itinerary link copied to clipboard!', 'info');
+        else alert('Itinerary link copied to clipboard!');
+      } else {
+        alert('Share URL: ' + window.location.href);
+      }
+    }
+
     function renderItinerary() {
       const urlParams = new URLSearchParams(window.location.search);
-      const tripId = urlParams.get('tripId') || 'trip-bali';
+      const tripId = urlParams.get('tripId');
 
       const trips = getTrips();
       let trip = trips.find(t => t.id === tripId);
@@ -316,10 +362,10 @@
       document.getElementById('itinTripTitle').textContent = trip.name;
       document.getElementById('itinDestination').textContent = trip.destination;
       document.getElementById('itinDates').textContent = trip.dates || 'Upcoming Journey';
-      document.getElementById('itinStatusBadge').textContent = trip.status.toUpperCase();
+      document.getElementById('itinStatusBadge').textContent = (trip.status || 'Active').toUpperCase();
 
       if (trip.imageUrl) {
-        document.getElementById('itinHeroBanner').style.background = `linear-gradient(135deg, rgba(26, 86, 219, 0.88), rgba(15, 23, 42, 0.82)), url('${trip.imageUrl}') center/cover no-repeat`;
+        document.getElementById('itinHeroBanner').style.background = `linear-gradient(135deg, rgba(26, 86, 219, 0.92), rgba(15, 23, 42, 0.85)), url('${trip.imageUrl}') center/cover no-repeat`;
       }
 
       // Populate Stats
@@ -327,7 +373,7 @@
       document.getElementById('statTotalBudget').textContent = `₹${Number(totalBudget).toLocaleString('en-IN')}`;
       document.getElementById('statStopCount').textContent = `${(trip.stops || []).length} Stops Planned`;
       document.getElementById('statPerPerson').textContent = `₹${Math.round(totalBudget / 2).toLocaleString('en-IN')}`;
-      document.getElementById('statStatus').textContent = trip.status.charAt(0).toUpperCase() + trip.status.slice(1);
+      document.getElementById('statStatus').textContent = (trip.status || 'Active').charAt(0).toUpperCase() + (trip.status || 'Active').slice(1);
 
       // Render Stops & Day-by-Day Activities
       const stopsContainer = document.getElementById('itinStopsContainer');
@@ -335,8 +381,11 @@
 
       if (stops.length === 0) {
         stopsContainer.innerHTML = `
-          <div style="text-align: center; padding: 40px; background: var(--clr-white); border-radius: 12px; border: 1px dashed var(--clr-border);">
-            <p style="color: var(--clr-text-muted);">No stops planned for this itinerary yet. Click "Edit in Builder" to add destinations and excursions.</p>
+          <div style="text-align: center; padding: 48px 24px; background: var(--clr-white); border-radius: 12px; border: 1px dashed var(--clr-border);">
+            <i class="fas fa-map-location-dot" style="font-size: 2.5rem; color: var(--clr-text-muted); margin-bottom: 14px; opacity: 0.6;"></i>
+            <h3 style="margin: 0 0 6px 0; color: var(--clr-text);">No Stops Planned Yet</h3>
+            <p style="color: var(--clr-text-muted); margin-bottom: 18px;">Click below to add destinations and schedule excursions.</p>
+            <a href="build-itinerary.html" class="btn btn--primary"><i class="fas fa-plus"></i> Open Itinerary Builder</a>
           </div>
         `;
         return;
@@ -344,31 +393,44 @@
 
       stopsContainer.innerHTML = stops.map((stop, idx) => {
         const activities = stop.activities || [];
-        const activitiesHtml = activities.length > 0 ? activities.map(act => `
-          <div class="activity-row">
-            <div>
-              <strong style="color: var(--clr-text); font-size: 0.95rem;">${act.title}</strong>
-              <div style="font-size: 0.82rem; color: var(--clr-text-muted); margin-top: 3px;">
-                <i class="fas fa-clock"></i> ${act.time || 'Flexible'} &bull; <span class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-size: 0.72rem; padding: 2px 6px;">${act.category || 'Sightseeing'}</span>
+        const activitiesHtml = activities.length > 0 ? activities.map(act => {
+          const meta = getCategoryMeta(act.category);
+          return `
+            <div class="activity-row">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="act-icon-box" style="background: ${meta.bg}; color: ${meta.color};">
+                  <i class="fas ${meta.icon}"></i>
+                </div>
+                <div>
+                  <strong style="color: var(--clr-text); font-size: 1rem; display: block;">${act.title}</strong>
+                  <div style="font-size: 0.82rem; color: var(--clr-text-muted); margin-top: 3px; display: flex; align-items: center; gap: 8px;">
+                    <span><i class="far fa-clock"></i> ${act.time || 'Flexible'}</span>
+                    <span>&bull;</span>
+                    <span class="badge" style="background: ${meta.bg}; color: ${meta.color}; font-size: 0.72rem; padding: 2px 8px; font-weight: 700;">${act.category || 'Sightseeing'}</span>
+                  </div>
+                </div>
+              </div>
+              <div style="font-weight: 800; color: var(--clr-text); font-size: 1.05rem; white-space: nowrap;">
+                ${act.cost > 0 ? '₹' + Number(act.cost).toLocaleString('en-IN') : '<span style="color: #16A34A; font-weight: 800;">Free</span>'}
               </div>
             </div>
-            <div style="font-weight: 700; color: var(--clr-text); font-size: 0.95rem;">
-              ${act.cost > 0 ? '₹' + Number(act.cost).toLocaleString('en-IN') : '<span style="color: var(--clr-success);">Free</span>'}
-            </div>
-          </div>
-        `).join('') : '<div style="padding: 16px 20px; color: var(--clr-text-muted); font-size: 0.88rem;">No activities configured for this stop.</div>';
+          `;
+        }).join('') : '<div style="padding: 20px 24px; color: var(--clr-text-muted); font-size: 0.9rem;">No specific activities added yet for this stop.</div>';
 
         return `
           <div class="stop-card">
             <div class="stop-header">
               <div>
-                <strong style="font-size: 1.1rem; color: var(--clr-text);">Stop ${idx + 1}: ${stop.city}</strong>
-                <div style="font-size: 0.82rem; color: var(--clr-text-muted); margin-top: 2px;">
-                  <i class="fas fa-calendar-alt"></i> ${stop.dateRange || ''} &bull; ${stop.duration || ''}
+                <strong style="font-size: 1.15rem; color: var(--clr-text); display: flex; align-items: center; gap: 8px;">
+                  <span class="badge" style="background: var(--clr-primary); color: #fff; font-size: 0.75rem; padding: 4px 8px;">Stop ${idx + 1}</span>
+                  ${stop.city}
+                </strong>
+                <div style="font-size: 0.85rem; color: var(--clr-text-muted); margin-top: 4px;">
+                  <i class="fas fa-calendar-alt" style="color: var(--clr-primary);"></i> ${stop.dateRange || ''} &bull; ${stop.duration || ''}
                 </div>
               </div>
               <div>
-                <span class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-size: 0.85rem; padding: 6px 12px; font-weight: 700;">
+                <span class="badge" style="background: var(--clr-primary-light); color: var(--clr-primary); font-size: 0.9rem; padding: 6px 14px; font-weight: 800;">
                   Stop Budget: ₹${Number(stop.budget || 0).toLocaleString('en-IN')}
                 </span>
               </div>

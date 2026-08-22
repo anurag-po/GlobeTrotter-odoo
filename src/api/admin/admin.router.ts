@@ -25,8 +25,15 @@ export function createAdminRouter(deps: { repos: Repositories }): Router {
   // GET /api/v1/admin/users
   router.get('/users', requireAuth, requireAdmin, userRateLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const query = listUsersQuerySchema.parse(req.query);
-      const result = await listUsers(query);
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string, 10) : 50;
+      const result = await deps.repos.userRepo.findAll({
+        page,
+        pageSize,
+        search: req.query.search as string,
+        status: req.query.status as string,
+        role: req.query.role as string,
+      });
       res.status(200).json(result);
     } catch (err) {
       next(err);
@@ -37,9 +44,54 @@ export function createAdminRouter(deps: { repos: Repositories }): Router {
   router.patch('/users/:id/status', requireAuth, requireAdmin, userRateLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const targetUserId = req.params.id as string;
-      const input = updateUserStatusSchema.parse(req.body);
-      const user = await updateUserStatus(req.currentUserId!, targetUserId, input.status);
+      const { status } = req.body;
+      const user = await deps.repos.userRepo.update(targetUserId, { status });
       res.status(200).json(user);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // PATCH /api/v1/admin/users/:id/role
+  router.patch('/users/:id/role', requireAuth, requireAdmin, userRateLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const targetUserId = req.params.id as string;
+      const { role } = req.body;
+      const user = await deps.repos.userRepo.update(targetUserId, { role });
+      res.status(200).json(user);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // DELETE /api/v1/admin/users/:id (Purge / Accept Data Deletion)
+  router.delete('/users/:id', requireAuth, requireAdmin, userRateLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const targetUserId = req.params.id as string;
+      await deps.repos.userRepo.softDelete(targetUserId);
+      res.status(200).json({ success: true, message: 'User data purged successfully' });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // POST /api/v1/admin/users (Create new Admin)
+  router.post('/users', requireAuth, requireAdmin, userRateLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password, firstName, lastName, username, role } = req.body;
+      const { PasswordHasher } = await import('../../infrastructure/auth/password-hasher.js');
+      const passwordHash = await PasswordHasher.hash(password || 'AdminPassword123!');
+      const user = await deps.repos.userRepo.create({
+        email,
+        passwordHash,
+        username: username || email.split('@')[0],
+        firstName: firstName || 'Admin',
+        lastName: lastName || 'User',
+        role: role || 'admin',
+        status: 'active',
+        hasVerifiedEmail: true,
+      });
+      res.status(201).json(user);
     } catch (err) {
       next(err);
     }

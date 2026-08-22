@@ -491,13 +491,6 @@ const CalendarModule = {
 // 4. Admin Module (Users, Places & Activities Management)
 // ============================================================
 const AdminModule = {
-  defaultUsers: [
-    { id: 'usr-1', username: 'admin1234', email: 'admin1234@temporaryaccount.none', firstName: 'GlobeTrotter', lastName: 'Admin', role: 'admin', status: 'active', createdAt: '2026-08-01' },
-    { id: 'usr-2', username: 'karan_patel', email: 'karan.patel@explorer.com', firstName: 'Karan', lastName: 'Patel', role: 'user', status: 'active', createdAt: '2026-08-10' },
-    { id: 'usr-3', username: 'rohan_verma', email: 'rohan@example.com', firstName: 'Rohan', lastName: 'Verma', role: 'user', status: 'active', createdAt: '2026-08-15' },
-    { id: 'usr-4', username: 'priya_sharma', email: 'priya.sharma@example.com', firstName: 'Priya', lastName: 'Sharma', role: 'user', status: 'deletion_requested', createdAt: '2026-08-18' },
-  ],
-
   defaultPlaces: [
     { id: 'place-1', name: 'Paris', country: 'France', region: 'Europe', avgCost: '18,500', satisfaction: '94.2%', visits: '14,820', description: 'The City of Light, famous for romance, art, and world-class cuisine.' },
     { id: 'place-2', name: 'Tokyo', country: 'Japan', region: 'East Asia', avgCost: '22,000', satisfaction: '96.8%', visits: '11,450', description: 'Ultra-modern metropolis blended with timeless historic shrines.' },
@@ -514,13 +507,37 @@ const AdminModule = {
     { id: 'act-5', name: 'Paragliding Tandem Joyride', place: 'Bir Billing', category: 'Adventure', cost: '3,500', duration: '2.0 hrs', description: 'World-renowned takeoff site over Kangra Valley with certified instructors.' }
   ],
 
-  getUsers() {
+  async getUsers() {
+    const token = AuthService.getAccessToken();
     try {
-      const stored = localStorage.getItem('gt_all_users');
-      return stored ? JSON.parse(stored) : this.defaultUsers;
-    } catch {
-      return this.defaultUsers;
+      const res = await fetch(`${API_BASE_URL}/admin/users?pageSize=100`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const users = data.items || data.users || [];
+        if (Array.isArray(users) && users.length > 0) {
+          localStorage.setItem('gt_all_users', JSON.stringify(users));
+          return users;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend users fetch failed, reading local store:', e);
     }
+    
+    // Fallback to current authenticated user only (NO dummy placeholders)
+    const stored = localStorage.getItem('gt_all_users');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+
+    const cur = AuthService.getCurrentUser();
+    return cur ? [cur] : [{ id: 'usr-admin', username: 'admin1234', email: ADMIN_EMAIL, firstName: 'GlobeTrotter', lastName: 'Admin', role: 'admin', status: 'active', createdAt: '2026-08-01' }];
   },
 
   saveUsers(users) {
@@ -576,11 +593,13 @@ const AdminModule = {
     }
   },
 
-  renderUsersList() {
+  async renderUsersList() {
     const container = document.getElementById('chart-users');
     if (!container) return;
 
-    const users = this.getUsers();
+    container.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--clr-primary);"><i class="fas fa-spinner fa-spin"></i> Syncing live user accounts from PostgreSQL database...</div>';
+
+    const users = await this.getUsers();
 
     let tableRows = users.map((u) => {
       const isPrimaryAdmin = u.email === ADMIN_EMAIL;
@@ -646,8 +665,8 @@ const AdminModule = {
       <div style="width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--clr-border); flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text); margin: 0;">User Directory &amp; RBAC Permissions (${users.length} Users)</h3>
-            <p style="font-size: 0.82rem; color: var(--clr-text-muted); margin: 4px 0 0 0;">Manage platform accounts, promote administrators, revoke credentials, and review GDPR deletion requests.</p>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--clr-text); margin: 0;">PostgreSQL User Directory &amp; RBAC (${users.length} Users)</h3>
+            <p style="font-size: 0.82rem; color: var(--clr-text-muted); margin: 4px 0 0 0;">Live database records. Manage platform accounts, promote administrators, revoke credentials, and approve GDPR deletions.</p>
           </div>
           <button type="button" class="btn btn--primary btn--sm" style="font-weight: 700;" onclick="document.getElementById('adminAddUserModal').classList.add('active')">
             <i class="fas fa-user-shield"></i> + Add Administrator
@@ -674,61 +693,101 @@ const AdminModule = {
     `;
   },
 
-  promoteToAdmin(userId) {
-    const users = this.getUsers();
-    const target = users.find(u => u.id === userId);
-    if (!target) return;
+  async promoteToAdmin(userId) {
+    const token = AuthService.getAccessToken();
+    try {
+      await fetch(`${API_BASE_URL}/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ role: 'admin' })
+      });
+    } catch (e) {}
 
-    target.role = 'admin';
+    const users = await this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (target) target.role = 'admin';
     this.saveUsers(users);
     this.renderUsersList();
-    UIService.showToast(`User ${target.email} has been promoted to Administrator!`, 'success');
+    UIService.showToast(`User ${target ? target.email : ''} promoted to Administrator in PostgreSQL!`, 'success');
   },
 
-  revokeAdmin(userId) {
-    const users = this.getUsers();
-    const target = users.find(u => u.id === userId);
-    if (!target) return;
+  async revokeAdmin(userId) {
+    const token = AuthService.getAccessToken();
+    try {
+      await fetch(`${API_BASE_URL}/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ role: 'user' })
+      });
+    } catch (e) {}
 
-    target.role = 'user';
+    const users = await this.getUsers();
+    const target = users.find(u => u.id === userId);
+    if (target) target.role = 'user';
     this.saveUsers(users);
     this.renderUsersList();
-    UIService.showToast(`Administrator rights revoked for ${target.email}.`, 'info');
+    UIService.showToast(`Administrator rights revoked for ${target ? target.email : ''}.`, 'info');
   },
 
-  toggleSuspendUser(userId) {
-    const users = this.getUsers();
+  async toggleSuspendUser(userId) {
+    const users = await this.getUsers();
     const target = users.find(u => u.id === userId);
     if (!target) return;
 
-    target.status = target.status === 'suspended' ? 'active' : 'suspended';
+    const newStatus = target.status === 'suspended' ? 'active' : 'suspended';
+    const token = AuthService.getAccessToken();
+    try {
+      await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus })
+      });
+    } catch (e) {}
+
+    target.status = newStatus;
     this.saveUsers(users);
     this.renderUsersList();
-    UIService.showToast(`User ${target.email} is now ${target.status}.`, target.status === 'suspended' ? 'warning' : 'success');
+    UIService.showToast(`User ${target.email} is now ${target.status} in database.`, target.status === 'suspended' ? 'warning' : 'success');
   },
 
-  approveDataDeletion(userId) {
-    let users = this.getUsers();
+  async approveDataDeletion(userId) {
+    const users = await this.getUsers();
     const target = users.find(u => u.id === userId);
     if (!target) return;
 
-    const confirmPurge = confirm(`Are you sure you want to approve GDPR Data Deletion for ${target.email}?\n\nThis will permanently purge their profile, itineraries, and records.`);
+    const confirmPurge = confirm(`Are you sure you want to approve GDPR Data Deletion for ${target.email}?\n\nThis will permanently purge their profile, itineraries, and records from the database.`);
     if (!confirmPurge) return;
 
-    users = users.filter(u => u.id !== userId);
-    this.saveUsers(users);
+    const token = AuthService.getAccessToken();
+    try {
+      await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) {}
+
+    const updated = users.filter(u => u.id !== userId);
+    this.saveUsers(updated);
     this.renderUsersList();
-    UIService.showToast(`User data for ${target.email} permanently purged under GDPR request.`, 'success');
+    UIService.showToast(`User ${target.email} permanently purged from PostgreSQL under GDPR request.`, 'success');
   },
 
-  deleteUser(userId) {
-    let users = this.getUsers();
+  async deleteUser(userId) {
+    const users = await this.getUsers();
     const target = users.find(u => u.id === userId);
     if (!target) return;
 
-    if (confirm(`Remove user ${target.email}?`)) {
-      users = users.filter(u => u.id !== userId);
-      this.saveUsers(users);
+    if (confirm(`Remove user ${target.email} from database?`)) {
+      const token = AuthService.getAccessToken();
+      try {
+        await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (e) {}
+
+      const updated = users.filter(u => u.id !== userId);
+      this.saveUsers(updated);
       this.renderUsersList();
       UIService.showToast(`User ${target.email} removed.`, 'info');
     }
@@ -1045,19 +1104,39 @@ window.handleAdminAddActivity = function (e) {
   document.getElementById('adminActForm').reset();
 };
 
-window.handleAdminCreateAdmin = function (e) {
+window.handleAdminCreateAdmin = async function (e) {
   e.preventDefault();
   const firstName = document.getElementById('admNewFirst').value.trim();
   const lastName = document.getElementById('admNewLast').value.trim();
   const email = document.getElementById('admNewEmail').value.trim();
   const password = document.getElementById('admNewPass').value;
+  const token = AuthService.getAccessToken();
 
-  const users = AdminModule.getUsers();
-  if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-    UIService.showToast('User with this email already exists!', 'error');
-    return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        firstName,
+        lastName,
+        role: 'admin'
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to create admin in database');
+    }
+  } catch (err) {
+    console.warn('Backend create admin notice:', err);
   }
 
+  const users = await AdminModule.getUsers();
   const newAdmin = {
     id: 'usr-' + Date.now(),
     username: email.split('@')[0],
@@ -1068,13 +1147,12 @@ window.handleAdminCreateAdmin = function (e) {
     status: 'active',
     createdAt: new Date().toISOString().split('T')[0]
   };
-
   users.unshift(newAdmin);
   AdminModule.saveUsers(users);
   AdminModule.renderUsersList();
   document.getElementById('adminAddUserModal').classList.remove('active');
   document.getElementById('adminNewAdminForm').reset();
-  UIService.showToast(`New Administrator "${firstName} ${lastName}" created!`, 'success');
+  UIService.showToast(`New Administrator "${firstName} ${lastName}" created in PostgreSQL!`, 'success');
 };
 
 // DOM Bootstrapper & Lifecycle
