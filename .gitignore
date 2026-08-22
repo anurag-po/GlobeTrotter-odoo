@@ -47,3 +47,10 @@ coverage/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Documentation, PRDs & Walkthroughs
+demo_walkthrough.md
+*PRD*.md
+*.prd.md
+*Implementation_Spec*.md
+database/*PRD*.md
